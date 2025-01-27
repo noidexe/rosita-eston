@@ -125,21 +125,21 @@ class Glyph extends RefCounted:
 ## [br]
 ## A "location" is a rectangular section of an image containing a glyph
 class Location extends RefCounted:
-	var image_uid : String
+	var path : String
 	var rect : Rect2i
-	func _init(p_image_uid : String, p_rect : Rect2i) -> void:
-		assert(p_image_uid.is_absolute_path())
+	func _init(p_path : String, p_rect : Rect2i) -> void:
+		assert(p_path.is_absolute_path())
 		assert(p_rect.size != Vector2i.ZERO)
-		image_uid = p_image_uid
+		path = p_path
 		rect = p_rect
 	
 	func to_dictionary() -> Dictionary:
-		return { "image_uid" : image_uid, "rect": rect }
+		return { "path" : path, "rect": rect }
 	
 	static func from_dictionary(dict: Dictionary) -> Location:
-		assert(dict.has("image_uid"))
+		assert(dict.has("path"))
 		assert(dict.has("rect"))
-		return Location.new( dict["image_uid"], dict["rect"] )
+		return Location.new( dict["path"], dict["rect"] )
 
 
 
