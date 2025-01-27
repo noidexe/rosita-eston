@@ -19,12 +19,18 @@ func _update_display():
 		return 
 	if not is_inside_tree():
 		await ready
-	%Preview.texture = glyph.preview
 	%Id.text = str(glyph.id)
 	for child : Node in %Definitions.get_children():
 		child.queue_free()
 	for i : int in glyph.definitions.size():
 		_add_definition(i, glyph.definitions[i])
+	var first_location = glyph.locations.front()
+	if first_location == null:
+		%Glyph.texture = null
+	var atlas_tex = AtlasTexture.new()
+	atlas_tex.atlas = Database.texture_cache.get_texture(first_location.path)
+	atlas_tex.region = first_location.rect
+	%Glyph.texture = atlas_tex
 
 
 func _on_add_definition_pressed() -> void:

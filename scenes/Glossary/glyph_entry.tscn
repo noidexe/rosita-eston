@@ -23,7 +23,9 @@ text = "00000"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
+size_flags_horizontal = 3
 texture = ExtResource("2_i87u2")
+expand_mode = 1
 stretch_mode = 5
 
 [node name="Definitions" type="Label" parent="."]
