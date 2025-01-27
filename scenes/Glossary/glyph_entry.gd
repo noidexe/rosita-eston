@@ -22,6 +22,6 @@ func _update_display():
 		return
 	if not is_inside_tree():
 		await ready
-	%id.text = str(glyph.id).pad_zeros(5)
+	%Id.text = str(glyph.id).pad_zeros(5)
 	%Glyph.texture = glyph.preview
-	%Meanings.text = str(glyph.meanings)
+	%Definitions.text = str(glyph.definitions)

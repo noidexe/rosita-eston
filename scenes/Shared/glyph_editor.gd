@@ -7,12 +7,12 @@ var glyph : Database.Glyph:
 		glyph.changed.connect(_update_display)
 		_update_display()
 
-func _add_meaning(index: int, text : String):
-	var meaning_editor : MeaningEditor = preload("uid://du8pnwobbthhw").instantiate()
-	meaning_editor.set_text(text)
-	meaning_editor.remove_requested.connect(_remove_meaning.bind(index))
-	meaning_editor.changed.connect(_on_meaning_changed.bind(index))
-	%Meanings.add_child(meaning_editor)
+func _add_definition(index: int, text : String):
+	var definition_editor : DefinitionEditor = preload("uid://du8pnwobbthhw").instantiate()
+	definition_editor.set_text(text)
+	definition_editor.remove_requested.connect(_remove_definition.bind(index))
+	definition_editor.changed.connect(_on_definition_changed.bind(index))
+	%Definitions.add_child(definition_editor)
 
 func _update_display():
 	if glyph == null:
@@ -21,17 +21,17 @@ func _update_display():
 		await ready
 	%Preview.texture = glyph.preview
 	%Id.text = str(glyph.id)
-	for child : Node in %Meanings.get_children():
+	for child : Node in %Definitions.get_children():
 		child.queue_free()
-	for i : int in glyph.meanings.size():
-		_add_meaning(i, glyph.meanings[i])
+	for i : int in glyph.definitions.size():
+		_add_definition(i, glyph.definitions[i])
 
 
-func _on_add_meaning_pressed() -> void:
-	glyph.meaning_add("")
+func _on_add_definition_pressed() -> void:
+	glyph.definition_add("")
 
-func _on_meaning_changed(new_meaning, index):
-	glyph.meaning_edit(index, new_meaning)
+func _on_definition_changed(new_def, index):
+	glyph.definition_edit(index, new_def)
 
-func _remove_meaning(index):
-	glyph.meaning_remove(index)
+func _remove_definition(index):
+	glyph.definition_remove(index)

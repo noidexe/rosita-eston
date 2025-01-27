@@ -1,13 +1,13 @@
 [gd_scene load_steps=2 format=3 uid="uid://du8pnwobbthhw"]
 
-[ext_resource type="Script" uid="uid://c87uwelhljh0b" path="res://scenes/Shared/meaning_editor.gd" id="1_wjmuq"]
+[ext_resource type="Script" uid="uid://c87uwelhljh0b" path="res://scenes/Shared/definition_editor.gd" id="1_058u1"]
 
-[node name="MeaningEditor" type="HBoxContainer"]
+[node name="DefinitionEditor" type="HBoxContainer"]
 offset_right = 143.0
 offset_bottom = 31.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
-script = ExtResource("1_wjmuq")
+script = ExtResource("1_058u1")
 
 [node name="Text" type="LineEdit" parent="."]
 layout_mode = 2

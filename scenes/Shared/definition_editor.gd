@@ -1,5 +1,5 @@
 extends HBoxContainer
-class_name MeaningEditor
+class_name DefinitionEditor
 
 var dirty := false
 signal changed(new_text : String)
@@ -15,7 +15,7 @@ func _on_text_text_submitted(new_text: String) -> void:
 	dirty = false
 	changed.emit(new_text)
 
-func _on_text_text_changed(new_text: String) -> void:
+func _on_text_text_changed(_new_text: String) -> void:
 	dirty = true
 
 func _on_text_focus_exited() -> void:

@@ -29,11 +29,11 @@ size_flags_horizontal = 3
 layout_mode = 2
 text = "Match: "
 
-[node name="Meanings" type="CheckBox" parent="SearchBox"]
+[node name="Perfect" type="CheckBox" parent="SearchBox"]
 unique_name_in_owner = true
 layout_mode = 2
 button_pressed = true
-text = "Meanings"
+text = "Perfect match"
 
 [node name="AllWords" type="CheckBox" parent="SearchBox"]
 unique_name_in_owner = true
@@ -85,6 +85,6 @@ unique_name_in_owner = true
 layout_mode = 2
 
 [connection signal="text_submitted" from="SearchBox/Query" to="." method="_on_query_text_submitted"]
-[connection signal="toggled" from="SearchBox/Meanings" to="." method="_on_meanings_toggled"]
+[connection signal="toggled" from="SearchBox/Perfect" to="." method="_on_perfect_toggled"]
 [connection signal="toggled" from="SearchBox/AllWords" to="." method="_on_all_words_toggled"]
 [connection signal="toggled" from="SearchBox/AnyWords" to="." method="_on_any_words_toggled"]

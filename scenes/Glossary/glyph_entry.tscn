@@ -14,7 +14,7 @@ script = ExtResource("1_xg4g2")
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="id" type="Label" parent="HBox"]
+[node name="Id" type="Label" parent="HBox"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "00000"
@@ -26,7 +26,7 @@ layout_mode = 2
 texture = ExtResource("2_i87u2")
 stretch_mode = 5
 
-[node name="Meanings" type="Label" parent="."]
+[node name="Definitions" type="Label" parent="."]
 unique_name_in_owner = true
 layout_mode = 2
 text = "[ lorem ipsum ]"

@@ -24,12 +24,12 @@ custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 stretch_mode = 5
 
-[node name="Meanings" type="VBoxContainer" parent="."]
+[node name="Definitions" type="VBoxContainer" parent="."]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="AddMeaning" type="Button" parent="."]
+[node name="AddDefinition" type="Button" parent="."]
 layout_mode = 2
 text = "Add Definition"
 
-[connection signal="pressed" from="AddMeaning" to="." method="_on_add_meaning_pressed"]
+[connection signal="pressed" from="AddDefinition" to="." method="_on_add_definition_pressed"]

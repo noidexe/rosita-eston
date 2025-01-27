@@ -3,12 +3,12 @@ extends VBoxContainer
 signal glyph_selected(glyph: Database.Glyph)
 
 func _on_query_text_submitted(new_text: String) -> void:
-	var query = Database.GlossarySearchQuery.new()
+	var query := Database.GlossarySearchQuery.new()
 	query.string = new_text
-	query.match_meanings = %Meanings.button_pressed
+	query.perfect_match = %Perfect.button_pressed
 	query.match_all_words = %AllWords.button_pressed
 	query.match_any_words = %AnyWords.button_pressed
-	var result = Database.glossary_search(query)
+	var result := Database.glossary_search(query)
 	clear()
 	for glyph in result:
 		add_entry(glyph)
@@ -20,7 +20,7 @@ func clear():
 		child.queue_free()
 
 func add_entry(glyph : Database.Glyph):
-	var glyph_entry = preload("uid://cwp60k603jkko").instantiate()
+	var glyph_entry : GlyphEntry = preload("uid://cwp60k603jkko").instantiate()
 	%SearchResults.add_child(glyph_entry)
 	glyph_entry.glyph = glyph
 	glyph_entry.selected.connect(edit_entry.bind(glyph))
@@ -34,7 +34,7 @@ func edit_entry(glyph : Database.Glyph):
 	glyph_selected.emit(glyph)
 
 
-func _on_meanings_toggled(_toggled_on: bool) -> void:
+func _on_perfect_toggled(_toggled_on: bool) -> void:
 	_on_query_text_submitted(%Query.text)
 
 
