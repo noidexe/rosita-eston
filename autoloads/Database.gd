@@ -3,6 +3,7 @@ class_name RositaDB
 
 const DEFAULT_DB_PATH = "user://database"
 const GLYPH_DB_FILENAME = "glyph_db.json"
+const SOURCE_DB_FOLDER = "sources"
 
 #[ PUBLIC API ]#
 
@@ -47,16 +48,20 @@ class Glyph extends RefCounted:
 	var id : int = 0 # TODO: Implement NullGlyph extends Glyph with id 0
 	var locations : Array[Location]= []
 	var definitions : Array[String]= []
-	var preview : Texture:
+	var preview_path : String:
 		set(v):
-			preview = v
-			_emit_changed()
+			push_error("Read-only")
+		get():
+			if locations.is_empty():
+				return ""
+			return locations.front().path
+			
 
 	func _init(p_id : int) -> void:
 		id = p_id
 
-	func locations_add ( image_uid : String, rect : Rect2 ):
-		var location := Location.new(image_uid, rect)
+	func locations_add ( path : String, rect : Rect2 ):
+		var location := Location.new(path, rect)
 		locations.append(location)
 		Database.location_added.emit(id, location)
 		_emit_changed()
@@ -128,18 +133,25 @@ class Location extends RefCounted:
 	var path : String
 	var rect : Rect2i
 	func _init(p_path : String, p_rect : Rect2i) -> void:
-		assert(p_path.is_absolute_path())
 		assert(p_rect.size != Vector2i.ZERO)
 		path = p_path
 		rect = p_rect
 	
 	func to_dictionary() -> Dictionary:
-		return { "path" : path, "rect": rect }
+		var dictionary := {}
+		return {
+			"path" : path, "rect": {
+				"x": rect.position.x,
+				"y": rect.position.y,
+				"w": rect.size.x,
+				"h": rect.size.y, } }
 	
 	static func from_dictionary(dict: Dictionary) -> Location:
 		assert(dict.has("path"))
 		assert(dict.has("rect"))
-		return Location.new( dict["path"], dict["rect"] )
+		var dict_rect = dict["rect"]
+		var _rect := Rect2i(dict_rect.x, dict_rect.y, dict_rect.w, dict_rect.h)
+		return Location.new( dict["path"], _rect )
 
 
 
@@ -150,10 +162,14 @@ class Location extends RefCounted:
 ## Initializes the database
 func db_create() -> Error:
 	var db_path : String = DEFAULT_DB_PATH.path_join(GLYPH_DB_FILENAME)
+	var sources_path : String = DEFAULT_DB_PATH.path_join(SOURCE_DB_FOLDER)
 	var err := ERR_BUG
 	
 	if not DirAccess.dir_exists_absolute(DEFAULT_DB_PATH):
 		DirAccess.make_dir_recursive_absolute(DEFAULT_DB_PATH)
+	
+	if not DirAccess.dir_exists_absolute(sources_path):
+		DirAccess.make_dir_recursive_absolute(sources_path)
 	
 	if FileAccess.file_exists(db_path):
 		return ERR_ALREADY_EXISTS
@@ -166,6 +182,8 @@ func db_create() -> Error:
 	glyph_db = GlyphDB.new()
 	definition_db = DefinitionDB.new(glyph_db)
 	word_db = WordDB.new(glyph_db)
+	sources_db = SourcesDB.new(glyph_db)
+	sources_db.add_sources_from_paths(DirAccess.get_files_at(sources_path))
 
 	db_file.store_string(glyph_db.serialize())
 	err = OK
@@ -175,9 +193,13 @@ func db_create() -> Error:
 func db_load() -> Error:
 	var start_time := Time.get_ticks_msec()
 	var db_path : String = DEFAULT_DB_PATH.path_join(GLYPH_DB_FILENAME)
+	var sources_path : String = DEFAULT_DB_PATH.path_join(SOURCE_DB_FOLDER)
 	var err := ERR_BUG
 	if not FileAccess.file_exists(db_path):
 		return db_create()
+	
+	if not DirAccess.dir_exists_absolute(sources_path):
+		DirAccess.make_dir_recursive_absolute(sources_path)
 	
 	var file = FileAccess.open(db_path, FileAccess.READ)
 	err = FileAccess.get_open_error()
@@ -187,6 +209,8 @@ func db_load() -> Error:
 	glyph_db = GlyphDB.deserialize( file.get_as_text() )
 	definition_db = DefinitionDB.new(glyph_db)
 	word_db = WordDB.new(glyph_db)
+	sources_db = SourcesDB.new(glyph_db)
+	sources_db.add_sources_from_paths(DirAccess.get_files_at(sources_path))
 	err = OK
 	print("Total time: %ss" % (0.001 * (Time.get_ticks_msec()-start_time )))
 	return err
@@ -460,17 +484,120 @@ class WordDB extends RefCounted:
 		return words.get(word, [])
 
 
+class Source extends RefCounted:
+	var path : String = ""
+	var rects : Dictionary[Rect2i, int] = {}
+	var size : bool:
+		set(v):
+			push_error("Read only")
+		get():
+			return rects.size()
+	var empty : bool:
+		set(v):
+			push_error("Read only")
+		get():
+			return rects.is_empty()
+
+	func _init(p_path : String) -> void:
+		assert(p_path.is_relative_path())
+		path = p_path
+	
+	func set_rect( rect : Rect2i, glyph_id: int):
+		rects[rect] = glyph_id
+	
+	func remove_rect( rect : Rect2i):
+		rects.erase(rect)
+
+
+class SourcesDB extends RefCounted:
+	var sources : Dictionary[String,Source] = {}
+	func _init(glyph_db : GlyphDB) -> void:
+		Database.location_added.connect(_on_location_added)
+		Database.location_removed.connect(_on_location_removed)
+		for glyph in glyph_db.get_all():
+			for l in glyph.locations:
+				_on_location_added(glyph.id, l)
+	
+	func _on_location_added(glyph_id : int, location : Location):
+		add_source(location.path)
+		var source : Source = sources[location.path]
+		source.set_rect(location.rect, glyph_id)
+	
+	func _on_location_removed(_glyph_id : int, location : Location):
+		assert(sources.has(location.path))
+		var source : Source = sources[location.path]
+		source.remove_rect(location.rect)
+		if source.empty:
+			remove_source(location.path)
+	
+	func add_source(path: String) -> Error:
+		assert(path.is_relative_path())
+		if sources.has(path):
+			return ERR_ALREADY_EXISTS
+		if path.get_extension() != "jpg":
+			return ERR_INVALID_DATA
+		sources[path] = Source.new(path)
+		return OK
+	
+	func remove_source(path: String):
+		sources.erase(path)
+
+	func add_sources_from_paths( paths: PackedStringArray):
+		for path in paths:
+			add_source(path)
+	
+	func list() -> Array[Source]:
+		return sources.values()
+	
+	func list_sorted() -> Array[Source]:
+		var ret := sources.values()
+		ret.sort_custom(func(a : Source, b: Source): return a.size < b.size )
+		return ret
+	
+	func list_empty() -> Array[Source]:
+		return sources.values().filter(func(s : Source): return s.empty )
+	
+	func list_non_empty() -> Array[Source]:
+		return sources.values().filter(func(s : Source): return not s.empty)
+
+class TextureCache extends RefCounted:
+	const MAX_TEXTURES := 20
+	var base_path : String = ""
+	var textures : Dictionary[String,Texture2D] = {}
+	
+	func _init(p_base_path : String) -> void:
+		assert(p_base_path.is_absolute_path())
+		base_path = p_base_path
+		textures[base_path] = Texture2D.new()
+	
+	func get_texture( path: String ) -> Texture2D:
+		return _get_or_load(base_path.path_join(path))
+	
+	func _get_or_load( full_path : String):
+		if textures.has(full_path):
+			return textures[full_path]
+		var image : Image = Image.load_from_file(full_path)
+		var texture : ImageTexture = ImageTexture.create_from_image(image)
+		if textures.size() >= MAX_TEXTURES:
+			textures.erase(textures.keys().front())
+		textures[full_path] = texture
+		return texture
+
+
 ## Active instance of GlyphDB
 var glyph_db: GlyphDB
 
 ## Active instance of SourcesDB
-var sources_db = {}
+var sources_db: SourcesDB
 
 ## Active instance of DefinitionDB
 var definition_db: DefinitionDB
 
 ## Active instance of WordDB
 var word_db : WordDB
+
+
+var texture_cache : TextureCache = TextureCache.new(DEFAULT_DB_PATH.path_join(SOURCE_DB_FOLDER))
 
 func _ready() -> void:
 	var err = db_load()
@@ -481,7 +608,7 @@ func _ready() -> void:
 	timer.autostart = true
 	timer.one_shot = false
 	timer.timeout.connect(db_save)
-	add_child(timer)	
+	add_child(timer)
 
 func _add_random_glyph():
 	var lorem_packed := "Lorem ipsum odor amet, consectetuer adipiscing elit. Penatibus etiam lacinia placerat quisque nullam pretium. Tristique bibendum potenti fringilla placerat fusce faucibus vitae nostra nisl. Elementum nascetur aliquam facilisi molestie quisque. Interdum felis eros rhoncus gravida inceptos dis! Eleifend nulla lectus justo duis orci ex; eget turpis a. Pretium augue tristique parturient per fames ad euismod semper. Ex justo fames eleifend rhoncus orci feugiat. Ipsum ultricies orci aenean integer ad purus. Erat habitasse curae egestas orci duis eleifend eleifend. Nostra aptent ad dapibus nunc orci imperdiet condimentum aliquam morbi. Nunc facilisis odio mi, aptent tristique sem sodales. Euismod facilisis suspendisse sit dui curabitur fusce non taciti. Per curae ultricies primis erat egestas sit duis! Conubia litora torquent maximus faucibus class lacinia.".split(" ")
