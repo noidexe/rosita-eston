@@ -1,0 +1,59 @@
+[gd_scene load_steps=3 format=3 uid="uid://6dxasujv64im"]
+
+[ext_resource type="Script" uid="uid://bjj7w517buox0" path="res://scenes/main.gd" id="1_o5qli"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sgp6g"]
+content_margin_left = 10.0
+content_margin_top = 10.0
+content_margin_right = 10.0
+content_margin_bottom = 10.0
+bg_color = Color(0.14452, 0.138921, 0.167969, 1)
+
+[node name="Main" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_o5qli")
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_sgp6g")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer"]
+layout_mode = 2
+
+[node name="ToolBar" type="HBoxContainer" parent="PanelContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Glossary" type="Button" parent="PanelContainer/VBoxContainer/ToolBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Glossary"
+
+[node name="Source Explorer" type="Button" parent="PanelContainer/VBoxContainer/ToolBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Source Explorer"
+
+[node name="Glyph Merge" type="Button" parent="PanelContainer/VBoxContainer/ToolBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Glyph Merge"
+
+[node name="Content" type="MarginContainer" parent="PanelContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5

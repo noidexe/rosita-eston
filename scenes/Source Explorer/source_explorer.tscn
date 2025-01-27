@@ -1,0 +1,59 @@
+[gd_scene load_steps=2 format=3 uid="uid://cm7nt1r5rwjrc"]
+
+[sub_resource type="ButtonGroup" id="ButtonGroup_76mm2"]
+
+[node name="SourceExplorer" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Thumbnails" type="ScrollContainer" parent="."]
+layout_mode = 2
+vertical_scroll_mode = 0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Thumbnails"]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="SourceExplorer" type="HBoxContainer" parent="."]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Toolbar" type="VBoxContainer" parent="SourceExplorer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Create" type="Button" parent="SourceExplorer/Toolbar"]
+layout_mode = 2
+size_flags_vertical = 3
+toggle_mode = true
+button_group = SubResource("ButtonGroup_76mm2")
+text = "Create"
+
+[node name="Select" type="Button" parent="SourceExplorer/Toolbar"]
+layout_mode = 2
+size_flags_vertical = 3
+toggle_mode = true
+button_group = SubResource("ButtonGroup_76mm2")
+text = "Select"
+
+[node name="Erase" type="Button" parent="SourceExplorer/Toolbar"]
+layout_mode = 2
+size_flags_vertical = 3
+toggle_mode = true
+button_group = SubResource("ButtonGroup_76mm2")
+text = "Erase"
+
+[node name="Viewport" type="SubViewportContainer" parent="SourceExplorer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="GlypEditorContainer" type="Control" parent="SourceExplorer"]
+unique_name_in_owner = true
+layout_mode = 2

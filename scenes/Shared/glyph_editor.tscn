@@ -1,0 +1,35 @@
+[gd_scene load_steps=2 format=3 uid="uid://bw5ts2cyuaquo"]
+
+[ext_resource type="Script" uid="uid://c7peari1qt8a1" path="res://scenes/Shared/glyph_editor.gd" id="1_f7dtx"]
+
+[node name="GlyphEditor" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+script = ExtResource("1_f7dtx")
+
+[node name="Id" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+horizontal_alignment = 1
+
+[node name="Preview" type="TextureRect" parent="."]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+stretch_mode = 5
+
+[node name="Meanings" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="AddMeaning" type="Button" parent="."]
+layout_mode = 2
+text = "Add Definition"
+
+[connection signal="pressed" from="AddMeaning" to="." method="_on_add_meaning_pressed"]

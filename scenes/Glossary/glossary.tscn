@@ -1,0 +1,90 @@
+[gd_scene load_steps=4 format=3 uid="uid://bm4obkucf6pvo"]
+
+[ext_resource type="Script" uid="uid://bo1anp52el4e5" path="res://scenes/Glossary/glossary.gd" id="1_l3ttd"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_l3ttd"]
+bg_color = Color(0.193359, 0.206201, 0.25, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_d1mkm"]
+bg_color = Color(0.193359, 0.206201, 0.25, 1)
+
+[node name="Glossary" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_l3ttd")
+
+[node name="SearchBox" type="HBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Query" type="LineEdit" parent="SearchBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Match" type="Label" parent="SearchBox"]
+layout_mode = 2
+text = "Match: "
+
+[node name="Meanings" type="CheckBox" parent="SearchBox"]
+unique_name_in_owner = true
+layout_mode = 2
+button_pressed = true
+text = "Meanings"
+
+[node name="AllWords" type="CheckBox" parent="SearchBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "All Words"
+
+[node name="AnyWords" type="CheckBox" parent="SearchBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Any Words"
+
+[node name="Content" type="HBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="SearchResultsContainer" type="ScrollContainer" parent="Content"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_l3ttd")
+horizontal_scroll_mode = 0
+
+[node name="SearchResults" type="VBoxContainer" parent="Content/SearchResultsContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="DetailsContainer" type="ScrollContainer" parent="Content"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_l3ttd")
+horizontal_scroll_mode = 0
+
+[node name="Details" type="VBoxContainer" parent="Content/DetailsContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="SourcesContainer" type="ScrollContainer" parent="Content"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_d1mkm")
+horizontal_scroll_mode = 0
+
+[node name="Sources" type="VBoxContainer" parent="Content/SourcesContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[connection signal="text_submitted" from="SearchBox/Query" to="." method="_on_query_text_submitted"]
+[connection signal="toggled" from="SearchBox/Meanings" to="." method="_on_meanings_toggled"]
+[connection signal="toggled" from="SearchBox/AllWords" to="." method="_on_all_words_toggled"]
+[connection signal="toggled" from="SearchBox/AnyWords" to="." method="_on_any_words_toggled"]
