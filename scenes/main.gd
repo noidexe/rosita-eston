@@ -10,7 +10,7 @@ const tool_scenes : Dictionary[Tools, Dictionary] = {
 var tool_instances : Dictionary[Tools, Node] = {}
 
 func _ready() -> void:
-	Database.db_load()
+	#Database.db_load()
 	
 	for node in %ToolBar.get_children():
 		%ToolBar.remove_child(node)

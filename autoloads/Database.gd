@@ -2,6 +2,7 @@ extends Node
 class_name RositaDB
 
 const DEFAULT_DB_PATH = "user://database"
+const GLYPH_DB_FILENAME = "glyph_db.json"
 
 #[ PUBLIC API ]#
 
@@ -12,6 +13,9 @@ signal glyph_added( glyph_id: int )
 
 @warning_ignore("unused_signal")
 signal glyph_removed( glyph_id: int, glyph : Glyph)
+
+@warning_ignore("unused_signal")
+signal glyph_modified( glyph_id: int)
 
 @warning_ignore("unused_signal")
 signal location_added( glyph_id : int, location : Location)
@@ -46,7 +50,7 @@ class Glyph extends RefCounted:
 	var preview : Texture:
 		set(v):
 			preview = v
-			changed.emit()
+			_emit_changed()
 
 	func _init(p_id : int) -> void:
 		id = p_id
@@ -55,7 +59,7 @@ class Glyph extends RefCounted:
 		var location := Location.new(image_uid, rect)
 		locations.append(location)
 		Database.location_added.emit(id, location)
-		changed.emit()
+		_emit_changed()
 
 	func locations_remove ( index : int ):
 		var location : Location = locations.pop_at( index )
@@ -64,7 +68,7 @@ class Glyph extends RefCounted:
 	func definition_add( def: String ) -> int:
 		definitions.append(def)
 		Database.definition_added.emit(id, def)
-		changed.emit()
+		_emit_changed()
 		return definitions.size() - 1
 
 	func definition_remove( index : int ) -> bool:
@@ -73,7 +77,7 @@ class Glyph extends RefCounted:
 			success = true
 			var def = definitions.pop_at(index)
 			Database.definition_removed.emit(id, def)
-			changed.emit()
+			_emit_changed()
 		return success
 
 	func definition_edit( index : int, def: String ) -> bool:
@@ -83,8 +87,39 @@ class Glyph extends RefCounted:
 			definitions[index] = def
 			Database.definition_removed.emit(id, removed_def)
 			Database.definition_added.emit(id, def)
-			changed.emit()
+			_emit_changed()
 		return success
+	
+	func to_dictionary() -> Dictionary:
+		var ret := Dictionary()
+		var serialized_locations : Array[Dictionary] = []
+		for l:Location in locations:
+			serialized_locations.append(l.to_dictionary())
+		
+		ret["id"] = id
+		ret["locations"] = serialized_locations
+		ret["definitions"] = definitions
+		return ret
+	
+	static func from_dictionary(dict : Dictionary) -> Glyph:
+		var ret := Glyph.new(0)
+		assert(dict.has("id"))
+		assert(dict.has("locations"))
+		assert(dict.has("definitions"))
+		
+		var serialized_locations = dict["locations"]
+		var deserialized_locations : Array[Location] = []
+		for l in serialized_locations:
+			deserialized_locations.append(Location.from_dictionary(l))
+
+		ret.id = dict["id"]
+		ret.locations = deserialized_locations
+		ret.definitions.assign( dict["definitions"] )
+		return ret
+	
+	func _emit_changed():
+		changed.emit()
+		Database.glyph_modified.emit(id)
 
 ## Defines a location.
 ## [br]
@@ -97,6 +132,15 @@ class Location extends RefCounted:
 		assert(p_rect.size != Vector2i.ZERO)
 		image_uid = p_image_uid
 		rect = p_rect
+	
+	func to_dictionary() -> Dictionary:
+		return { "image_uid" : image_uid, "rect": rect }
+	
+	static func from_dictionary(dict: Dictionary) -> Location:
+		assert(dict.has("image_uid"))
+		assert(dict.has("rect"))
+		return Location.new( dict["image_uid"], dict["rect"] )
+
 
 
 #==[ Public Methods ]#
@@ -105,29 +149,63 @@ class Location extends RefCounted:
 
 ## Initializes the database
 func db_create() -> Error:
-	return ERR_BUG
+	var db_path : String = DEFAULT_DB_PATH.path_join(GLYPH_DB_FILENAME)
+	var err := ERR_BUG
+	
+	if not DirAccess.dir_exists_absolute(DEFAULT_DB_PATH):
+		DirAccess.make_dir_recursive_absolute(DEFAULT_DB_PATH)
+	
+	if FileAccess.file_exists(db_path):
+		return ERR_ALREADY_EXISTS
+	
+	var db_file = FileAccess.open(db_path,FileAccess.WRITE)
+	err = FileAccess.get_open_error()
+	if err != OK:
+		return err
+
+	glyph_db = GlyphDB.new()
+	definition_db = DefinitionDB.new(glyph_db)
+	word_db = WordDB.new(glyph_db)
+
+	db_file.store_string(glyph_db.serialize())
+	err = OK
+	return err
 
 ## Loads the database
-func db_load() -> bool:
-	var db_path : String = DEFAULT_DB_PATH
-	var err : int = ERR_BUG
-	if not DirAccess.dir_exists_absolute(db_path):
-		err = db_create()
+func db_load() -> Error:
+	var start_time := Time.get_ticks_msec()
+	var db_path : String = DEFAULT_DB_PATH.path_join(GLYPH_DB_FILENAME)
+	var err := ERR_BUG
+	if not FileAccess.file_exists(db_path):
+		return db_create()
 	
+	var file = FileAccess.open(db_path, FileAccess.READ)
+	err = FileAccess.get_open_error()
 	if not err == OK:
 		return err
 	
-	DirAccess.open(db_path)
-	err = DirAccess.get_open_error()
-	if not err == OK:
-		return err
-	
-	
+	glyph_db = GlyphDB.deserialize( file.get_as_text() )
+	definition_db = DefinitionDB.new(glyph_db)
+	word_db = WordDB.new(glyph_db)
+	err = OK
+	print("Total time: %ss" % (0.001 * (Time.get_ticks_msec()-start_time )))
 	return err
 
 ## Saves the database
-func db_save() -> bool:
-	return ERR_BUG
+func db_save() -> Error:
+	var start_time := Time.get_ticks_msec()
+	var db_path : String = DEFAULT_DB_PATH.path_join(GLYPH_DB_FILENAME)
+	var err := ERR_BUG
+
+	var file = FileAccess.open(db_path, FileAccess.WRITE)
+	err = FileAccess.get_open_error()
+	if not err == OK:
+		return err
+	
+	file.store_string(glyph_db.serialize())
+	err = OK
+	print("Saved in %ss" % (0.001 * (Time.get_ticks_msec() - start_time) ))
+	return err
 
 #====[ Search ]#
 
@@ -223,6 +301,44 @@ class GlyphDB extends RefCounted:
 				glyph_set[glyph] = true
 		ret = glyph_set.keys()
 		return ret
+	
+	func to_dictionary() -> Dictionary:
+		var ret := Dictionary()
+		var serialized_glyphs : Array = []
+		for g : Glyph in glyphs:
+			if g == null:
+				serialized_glyphs.append(null)
+			else:
+				serialized_glyphs.append(g.to_dictionary())
+		ret["glyphs"] = serialized_glyphs
+		return ret
+	
+	static func from_dictionary(dict : Dictionary) -> GlyphDB:
+		var ret = GlyphDB.new()
+		assert(dict.has("glyphs"))
+		var deserialized_glyphs : Array[Glyph] = []
+		var serialized_glyphs : Array = dict["glyphs"]
+		var _free_ids : Dictionary[int, bool] = {}
+		for i : int  in serialized_glyphs.size():
+			var g = serialized_glyphs[i]
+			assert(g == null or g is Dictionary)
+			if g == null:
+				deserialized_glyphs.append(null)
+				_free_ids[i] = true
+			else:
+				var glyph : Glyph = Glyph.from_dictionary(g)
+				assert(glyph.id == deserialized_glyphs.size())
+				deserialized_glyphs.append(glyph)
+		
+		ret.glyphs = deserialized_glyphs
+		ret.free_ids = _free_ids
+		return ret
+	
+	func serialize() -> String:
+		return JSON.stringify(to_dictionary(), "\t")
+	
+	static func deserialize(json_string : String) -> GlyphDB:
+		return GlyphDB.from_dictionary(JSON.parse_string(json_string))
 	
 	func _get_free_id() -> int:
 		var id = -1
@@ -357,14 +473,15 @@ var definition_db: DefinitionDB
 var word_db : WordDB
 
 func _ready() -> void:
-	glyph_db = GlyphDB.new()
-	# For testing
-	for i in 20:
-		_add_random_glyph()
-	definition_db = DefinitionDB.new(glyph_db)
-	word_db = WordDB.new(glyph_db)
-	for i in 20:
-		_add_random_glyph()
+	var err = db_load()
+	assert(err == OK)
+	
+	var timer := Timer.new()
+	timer.wait_time = 20
+	timer.autostart = true
+	timer.one_shot = false
+	timer.timeout.connect(db_save)
+	add_child(timer)	
 
 func _add_random_glyph():
 	var lorem_packed := "Lorem ipsum odor amet, consectetuer adipiscing elit. Penatibus etiam lacinia placerat quisque nullam pretium. Tristique bibendum potenti fringilla placerat fusce faucibus vitae nostra nisl. Elementum nascetur aliquam facilisi molestie quisque. Interdum felis eros rhoncus gravida inceptos dis! Eleifend nulla lectus justo duis orci ex; eget turpis a. Pretium augue tristique parturient per fames ad euismod semper. Ex justo fames eleifend rhoncus orci feugiat. Ipsum ultricies orci aenean integer ad purus. Erat habitasse curae egestas orci duis eleifend eleifend. Nostra aptent ad dapibus nunc orci imperdiet condimentum aliquam morbi. Nunc facilisis odio mi, aptent tristique sem sodales. Euismod facilisis suspendisse sit dui curabitur fusce non taciti. Per curae ultricies primis erat egestas sit duis! Conubia litora torquent maximus faucibus class lacinia.".split(" ")
