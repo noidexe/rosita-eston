@@ -75,7 +75,6 @@ class Glyph extends RefCounted:
 			locations_remove(i)
 		for i in definitions.size():
 			definition_remove(i)
-		Database.glyph_remove(id)
 
 	func locations_add ( path : String, rect : Rect2 ):
 		var location := Location.new(path, rect)
@@ -353,6 +352,9 @@ static func extract_words( sentence : String) -> PackedStringArray:
 class GlyphDB extends RefCounted:
 	var glyphs : Array[Glyph] = [Glyph.new(0)]
 	var free_ids : Dictionary[int, bool] = {}
+	
+	func _init() -> void:
+		Database.glyph_modified.connect(_on_glyph_modified)
 
 	func size():
 		return glyphs.size()
@@ -442,6 +444,12 @@ class GlyphDB extends RefCounted:
 			id = glyphs.size()
 			glyphs.append(null)
 		return id
+	
+	func _on_glyph_modified(id: int):
+		if not(id > 0 and id < glyphs.size() and glyphs[id] != null):
+			return false
+		if glyphs[id].is_destroyed:
+			remove(id)
 
 
 ## A database of definitons
