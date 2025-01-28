@@ -32,6 +32,8 @@ func _ready() -> void:
 		%ToolBar.add_child(tool_button)
 		var tool_scene : Node = (tool_scenes[key].scene as PackedScene).instantiate()
 		tool_instances[key] = tool_scene
+	
+	(tool_instances[Tools.GLOSSARY] as Glossary).glyph_selected.connect((tool_instances[Tools.SOURCES] as SourceExplorer)._on_glyph_selected)
 
 func _set_ui_scale():
 	get_window().content_scale_factor = DisplayServer.screen_get_dpi() / 96.0

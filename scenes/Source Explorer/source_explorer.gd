@@ -1,4 +1,5 @@
 extends VBoxContainer
+class_name SourceExplorer
 
 var current_path := ""
 
@@ -78,3 +79,8 @@ func _on_selected_text_submitted(new_text: String) -> void:
 	var number = wrapi(int(new_text), 0, Database.glyph_count())
 	viewer.select(number)
 	%Selected.text = str(number)
+
+func _on_glyph_selected( glyph : Database.Glyph):
+	if glyph == null:
+		return
+	viewer.select(glyph.id)

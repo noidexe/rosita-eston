@@ -1,4 +1,5 @@
 extends VBoxContainer
+class_name Glossary
 
 signal glyph_selected(glyph: Database.Glyph)
 
