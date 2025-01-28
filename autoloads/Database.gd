@@ -639,7 +639,7 @@ class TextureCache extends RefCounted:
 			return
 		var full_path : String = base_path.path_join(path)
 		var image : Image = Image.load_from_file(full_path) if FileAccess.file_exists(full_path) else null
-		var texture : Texture2D = ImageTexture.create_from_image(image) if image else preload("uid://cc27nwruufj0o")
+		var texture : Texture2D = ImageTexture.create_from_image(image) if image else (preload("uid://cc27nwruufj0o") as Texture2D)
 		if textures.size() >= MAX_TEXTURES:
 			textures.erase(textures.keys().front())
 		textures[path] = texture
@@ -662,7 +662,7 @@ class TextureCache extends RefCounted:
 			if image:
 				image.resize(200,113,Image.INTERPOLATE_LANCZOS)
 				image.save_jpg(full_path_thumb, 0.85)
-		var texture : Texture2D = ImageTexture.create_from_image(image) if image else preload("uid://cc27nwruufj0o")
+		var texture : Texture2D = ImageTexture.create_from_image(image) if image else (preload("uid://cc27nwruufj0o") as Texture2D)
 		if thumbnails.size() >= MAX_THUMBNAIS:
 			thumbnails.erase(thumbnails.keys().front())
 		thumbnails[path] = texture
