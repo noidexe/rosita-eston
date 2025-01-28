@@ -15,7 +15,7 @@ func _ready() -> void:
 			%Create.set_pressed_no_signal(true)
 	var sources := Database.sources_db.list()
 	for source in sources:
-		var texture = Database.get_thumbnail(source.path)
+		var texture = Database.get_thumbnail(source)
 		var button := TextureButton.new()
 		button.texture_normal = texture
 		button.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED

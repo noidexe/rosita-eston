@@ -24,7 +24,7 @@ func get_aspect_ratio():
 
 func set_source( p_source : Database.Source ):
 	source = p_source
-	$source.texture = Database.get_texture(p_source.path)
+	$source.texture = Database.get_texture(p_source)
 	var texture_rect : Rect2 = $source.get_rect()
 	get_viewport().size_2d_override = texture_rect.size
 	center = texture_rect.get_center()

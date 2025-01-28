@@ -48,7 +48,7 @@ func edit_entry(glyph : Database.Glyph):
 			continue
 		used_paths.append(location.path)
 		var texture : TextureRect = preload("uid://7yslra30tunh").instantiate()
-		texture.texture = Database.get_thumbnail(location.path)
+		texture.texture = Database.get_thumbnail(location)
 		texture.selected.connect(source_selected.emit.bind(location.path))
 		%Sources.add_child(texture)
 

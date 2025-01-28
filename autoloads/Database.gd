@@ -321,11 +321,35 @@ func glyph_count() -> int:
 #endregion
 
 #region Texture retrieval
-func get_texture(path : String) -> Texture2D:
-	return texture_cache.get_texture(path)
+func glyph_get_texture(glyph: Glyph) -> Texture2D:
+	if glyph == null or glyph.locations.is_empty():
+		return Texture2D.new()
+	var first_location : Location = glyph.locations.front()
+	return texture_cache.get_texture_region(first_location.path, first_location.rect)
 
-func get_thumbnail(path : String) -> Texture2D:
-	return texture_cache.get_thumbnail(path)
+
+# Accepts a Source, a Location or a path
+func get_texture(key : Variant) -> Texture2D:
+	if key is Source:
+		return texture_cache.get_texture(key.path)
+	elif key is Location:
+		return texture_cache.get_texture(key.path)
+	elif key is String:
+		return texture_cache.get_texture(key)
+	else:
+		return Texture2D.new()
+
+
+# Accepts a Source, a Location or a path
+func get_thumbnail(key : Variant) -> Texture2D:
+	if key is Source:
+		return texture_cache.get_thumbnail(key.path)
+	elif key is Location:
+		return texture_cache.get_thumbnail(key.path)
+	elif key is String:
+		return texture_cache.get_thumbnail(key)
+	else:
+		return Texture2D.new()
 #endregion
 
 #region Helper Funcs
@@ -653,6 +677,13 @@ class TextureCache extends RefCounted:
 	func get_texture( path: String ) -> Texture2D:
 		_load_texture_if_needed(path)
 		return textures[path]
+	
+	func get_texture_region( path : String, region: Rect2i) -> Texture2D:
+		var atlas_tex := AtlasTexture.new() 
+		var atlas := get_texture(path)
+		atlas_tex.atlas = atlas
+		atlas_tex.region = region
+		return atlas_tex
 	
 	func get_thumbnail( path: String ) -> Texture2D:
 		_load_thumb_if_needed(path)

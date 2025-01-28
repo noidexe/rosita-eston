@@ -37,11 +37,7 @@ func _update_display():
 	if glyph.orphan:
 		%Glyph.texture = null
 	else:
-		var first_location = glyph.locations.front()
-		var atlas_tex = AtlasTexture.new()
-		atlas_tex.atlas = Database.get_texture(first_location.path)
-		atlas_tex.region = first_location.rect
-		%Glyph.texture = atlas_tex
+		%Glyph.texture = Database.glyph_get_texture(glyph)
 
 
 func _on_add_definition_pressed() -> void:
