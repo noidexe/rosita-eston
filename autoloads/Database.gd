@@ -81,8 +81,8 @@ class Glyph extends RefCounted:
 	func locations_remove ( index : int ):
 		var location : Location = locations.pop_at( index )
 		Database.location_removed.emit(id, location)
-		#if orphan:
-			#destroy()
+		if orphan and definitions.is_empty():
+			destroy()
 	
 	func locations_remove_rect ( rect : Rect2i ):
 		for i in locations.size():
@@ -103,6 +103,8 @@ class Glyph extends RefCounted:
 			var def = definitions.pop_at(index)
 			Database.definition_removed.emit(id, def)
 			_emit_changed()
+		if orphan and definitions.is_empty():
+			destroy()
 		return success
 
 	func definition_edit( index : int, def: String ) -> bool:
