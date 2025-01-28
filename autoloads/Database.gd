@@ -694,7 +694,7 @@ func _ready() -> void:
 	timer.wait_time = 60
 	timer.autostart = true
 	timer.one_shot = false
-	timer.timeout.connect(func(): print(await db_save()))
+	timer.timeout.connect(db_save)
 	add_child(timer)
 
 func _notification(what: int) -> void:
