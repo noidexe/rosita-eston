@@ -17,8 +17,13 @@ func _add_definition(index: int, text : String):
 func _update_display():
 	if glyph == null:
 		return 
+	if glyph.destroyed:
+		queue_free()
+		return
 	if not is_inside_tree():
 		await ready
+	if is_queued_for_deletion():
+		return
 	%Id.text = str(glyph.id)
 	for child : Node in %Definitions.get_children():
 		child.queue_free()
