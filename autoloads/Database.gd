@@ -685,6 +685,8 @@ var word_db : WordDB
 var texture_cache : TextureCache = TextureCache.new(DEFAULT_DB_PATH.path_join(SOURCE_DB_FOLDER))
 
 func _ready() -> void:
+	get_tree().auto_accept_quit = false
+	get_tree().quit_on_go_back = false
 	var err = db_load()
 	assert(err == OK)
 	
@@ -694,6 +696,11 @@ func _ready() -> void:
 	timer.one_shot = false
 	timer.timeout.connect(func(): print(await db_save()))
 	add_child(timer)
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		await db_save()
+		get_tree().quit()
 
 func _add_random_glyph():
 	var lorem_packed := "Lorem ipsum odor amet, consectetuer adipiscing elit. Penatibus etiam lacinia placerat quisque nullam pretium. Tristique bibendum potenti fringilla placerat fusce faucibus vitae nostra nisl. Elementum nascetur aliquam facilisi molestie quisque. Interdum felis eros rhoncus gravida inceptos dis! Eleifend nulla lectus justo duis orci ex; eget turpis a. Pretium augue tristique parturient per fames ad euismod semper. Ex justo fames eleifend rhoncus orci feugiat. Ipsum ultricies orci aenean integer ad purus. Erat habitasse curae egestas orci duis eleifend eleifend. Nostra aptent ad dapibus nunc orci imperdiet condimentum aliquam morbi. Nunc facilisis odio mi, aptent tristique sem sodales. Euismod facilisis suspendisse sit dui curabitur fusce non taciti. Per curae ultricies primis erat egestas sit duis! Conubia litora torquent maximus faucibus class lacinia.".split(" ")
