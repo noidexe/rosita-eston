@@ -32,7 +32,16 @@ func edit_entry(glyph : Database.Glyph):
 	%Details.add_child(glyph_editor)
 	glyph_editor.glyph = glyph
 	glyph_selected.emit(glyph)
-
+	for child in %Sources.get_children():
+		child.queue_free()
+	for location in glyph.locations:
+		var texture = TextureRect.new()
+		texture.expand_mode = TextureRect.EXPAND_FIT_HEIGHT_PROPORTIONAL
+		texture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		texture.size_flags_horizontal = Control.SIZE_FILL
+		texture.size_flags_horizontal = Control.SIZE_FILL
+		texture.texture = Database.texture_cache.get_thumbnail(location.path)
+		%Sources.add_child(texture)
 
 func _on_perfect_toggled(_toggled_on: bool) -> void:
 	_on_query_text_submitted(%Query.text)

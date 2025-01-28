@@ -10,8 +10,7 @@ const tool_scenes : Dictionary[Tools, Dictionary] = {
 var tool_instances : Dictionary[Tools, Node] = {}
 
 func _ready() -> void:
-	#Database.db_load()
-	
+	_set_ui_scale()
 	for node in %ToolBar.get_children():
 		%ToolBar.remove_child(node)
 
@@ -27,6 +26,10 @@ func _ready() -> void:
 		%ToolBar.add_child(tool_button)
 		var tool_scene : Node = (tool_scenes[key].scene as PackedScene).instantiate()
 		tool_instances[key] = tool_scene
+
+func _set_ui_scale():
+	get_window().content_scale_factor = DisplayServer.screen_get_dpi() / 96.0
+
 
 func _on_tool_selected( tool : Tools):
 	for node in %Content.get_children():

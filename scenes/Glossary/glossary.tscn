@@ -3,6 +3,10 @@
 [ext_resource type="Script" uid="uid://bo1anp52el4e5" path="res://scenes/Glossary/glossary.gd" id="1_l3ttd"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_l3ttd"]
+content_margin_left = 10.0
+content_margin_top = 5.0
+content_margin_right = 10.0
+content_margin_bottom = 5.0
 bg_color = Color(0.193359, 0.206201, 0.25, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_d1mkm"]
@@ -61,6 +65,7 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+theme_override_constants/separation = 5
 
 [node name="DetailsContainer" type="ScrollContainer" parent="Content"]
 layout_mode = 2
@@ -83,6 +88,8 @@ horizontal_scroll_mode = 0
 [node name="Sources" type="VBoxContainer" parent="Content/SourcesContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
 [connection signal="text_submitted" from="SearchBox/Query" to="." method="_on_query_text_submitted"]
 [connection signal="toggled" from="SearchBox/Perfect" to="." method="_on_perfect_toggled"]

@@ -1,4 +1,4 @@
-extends VBoxContainer
+extends PanelContainer
 class_name GlyphEntry
 
 signal selected()
@@ -14,16 +14,24 @@ func _ready() -> void:
 
 
 func _on_gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.is_pressed():
+	if event is InputEventMouseButton and event.is_pressed() and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
 		selected.emit()
 
 func _update_display():
 	if glyph == null:
 		return
+	if glyph.destroyed:
+		queue_free()
+		return
 	if not is_inside_tree():
 		await ready
 	%Id.text = str(glyph.id).pad_zeros(5)
-	%Definitions.text = str(glyph.definitions)
+	var defs_text = ""
+	for def in glyph.definitions:
+		defs_text += def
+		defs_text += ", "
+	defs_text = defs_text.trim_suffix(", ")
+	%Definitions.text = defs_text
 	var first_location = glyph.locations.front()
 	if first_location == null:
 		%Glyph.texture = null
