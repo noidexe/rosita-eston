@@ -5,7 +5,7 @@
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_76mm2"]
 
-[node name="SourceExplorer" type="VBoxContainer"]
+[node name="SourceExplorer" type="VBoxContainer" node_paths=PackedStringArray("viewer")]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -14,6 +14,7 @@ grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 script = ExtResource("1_v3bfa")
+viewer = NodePath("SourceExplorer/AspectRatioContainer/Viewport/SubViewport/SourceViewer")
 
 [node name="ThumbnailsContainer" type="ScrollContainer" parent="."]
 layout_mode = 2
@@ -34,44 +35,60 @@ size_flags_vertical = 3
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="Create" type="Button" parent="SourceExplorer/Toolbar"]
-layout_mode = 2
-size_flags_vertical = 3
-toggle_mode = true
-button_group = SubResource("ButtonGroup_76mm2")
-text = "Create"
-
 [node name="Select" type="Button" parent="SourceExplorer/Toolbar"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 toggle_mode = true
 button_group = SubResource("ButtonGroup_76mm2")
 text = "Select"
 
+[node name="Create" type="Button" parent="SourceExplorer/Toolbar"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+toggle_mode = true
+button_group = SubResource("ButtonGroup_76mm2")
+text = "Create"
+
 [node name="Erase" type="Button" parent="SourceExplorer/Toolbar"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 toggle_mode = true
 button_group = SubResource("ButtonGroup_76mm2")
 text = "Erase"
 
-[node name="Viewport" type="SubViewportContainer" parent="SourceExplorer"]
+[node name="AspectRatioContainer" type="AspectRatioContainer" parent="SourceExplorer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 3.0
+
+[node name="Viewport" type="SubViewportContainer" parent="SourceExplorer/AspectRatioContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 stretch = true
 
-[node name="SubViewport" type="SubViewport" parent="SourceExplorer/Viewport"]
+[node name="SubViewport" type="SubViewport" parent="SourceExplorer/AspectRatioContainer/Viewport"]
 handle_input_locally = false
-size = Vector2i(1084, 544)
+size = Vector2i(544, 544)
 size_2d_override_stretch = true
 render_target_update_mode = 4
 
-[node name="SourceViewer" parent="SourceExplorer/Viewport/SubViewport" instance=ExtResource("2_bp0f1")]
+[node name="SourceViewer" parent="SourceExplorer/AspectRatioContainer/Viewport/SubViewport" instance=ExtResource("2_bp0f1")]
 position = Vector2(64, 104)
 
-[node name="GlyphEditorContainer" type="Control" parent="SourceExplorer"]
+[node name="GlyphEditorContainer" type="ScrollContainer" parent="SourceExplorer"]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
+horizontal_scroll_mode = 0
 
-[connection signal="rect_selected" from="SourceExplorer/Viewport/SubViewport/SourceViewer" to="." method="_on_source_viewer_rect_selected"]
+[connection signal="pressed" from="SourceExplorer/Toolbar/Select" to="." method="_on_select_pressed"]
+[connection signal="pressed" from="SourceExplorer/Toolbar/Create" to="." method="_on_create_pressed"]
+[connection signal="pressed" from="SourceExplorer/Toolbar/Erase" to="." method="_on_erase_pressed"]
+[connection signal="glyph_removed" from="SourceExplorer/AspectRatioContainer/Viewport/SubViewport/SourceViewer" to="." method="_on_source_viewer_glyph_removed"]
+[connection signal="glyph_selected" from="SourceExplorer/AspectRatioContainer/Viewport/SubViewport/SourceViewer" to="." method="_on_source_viewer_glyph_selected"]
+[connection signal="rect_selected" from="SourceExplorer/AspectRatioContainer/Viewport/SubViewport/SourceViewer" to="." method="_on_source_viewer_rect_selected"]

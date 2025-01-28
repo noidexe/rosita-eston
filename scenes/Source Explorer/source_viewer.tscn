@@ -1,12 +1,15 @@
-[gd_scene load_steps=2 format=3 uid="uid://dtxgehkbutxbv"]
+[gd_scene load_steps=3 format=3 uid="uid://dtxgehkbutxbv"]
 
 [ext_resource type="Script" uid="uid://bwvjncihyjo6t" path="res://scenes/Source Explorer/source_viewer.gd" id="1_g5f4l"]
 
+[sub_resource type="SystemFont" id="SystemFont_g5f4l"]
+font_names = PackedStringArray("Sans-Serif")
+
 [node name="SourceViewer" type="Node2D"]
 script = ExtResource("1_g5f4l")
+font = SubResource("SystemFont_g5f4l")
 
 [node name="camera" type="Camera2D" parent="."]
-anchor_mode = 0
 
 [node name="source" type="Sprite2D" parent="."]
 show_behind_parent = true

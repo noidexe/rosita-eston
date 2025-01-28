@@ -2,7 +2,16 @@ extends VBoxContainer
 
 var current_path := ""
 
+@export var viewer : SourceViewer
+
 func _ready() -> void:
+	match viewer.mode:
+		SourceViewer.Mode.SELECT:
+			%Select.set_pressed_no_signal(true)
+		SourceViewer.Mode.CREATE:
+			%Create.set_pressed_no_signal(true)
+		SourceViewer.Mode.REMOVE:
+			%Create.set_pressed_no_signal(true)
 	var sources := Database.sources_db.list()
 	for source in sources:
 		var texture = Database.texture_cache.get_thumbnail(source.path)
@@ -18,10 +27,35 @@ func _ready() -> void:
 
 
 func _on_thumb_selected( path: String ):
-	(%Viewport/SubViewport.get_child(0) as SourceViewer).set_source(Database.sources_db.sources.get(path))
+	viewer.set_source(Database.sources_db.sources.get(path))
+	%AspectRatioContainer.ratio = viewer.get_aspect_ratio()
 	current_path = path
+
+
+func _on_create_pressed() -> void:
+	viewer.mode = SourceViewer.Mode.CREATE
+
+func _on_select_pressed() -> void:
+	viewer.mode = SourceViewer.Mode.SELECT
+
+func _on_erase_pressed() -> void:
+	viewer.mode = SourceViewer.Mode.REMOVE
 
 
 func _on_source_viewer_rect_selected(rect: Rect2) -> void:
 	var glyph : Database.Glyph = Database.glyph_add()
 	glyph.locations_add(current_path, rect)
+	viewer.selected = glyph.id
+
+
+func _on_source_viewer_glyph_selected(id: int) -> void:
+	for child in %GlyphEditorContainer.get_children():
+		child.queue_free()
+	var glyph = Database.glyph_db.get_at(id)
+	var glyph_editor : GlyphEditor = preload("uid://bw5ts2cyuaquo").instantiate()
+	%GlyphEditorContainer.add_child(glyph_editor)
+	glyph_editor.glyph = glyph
+
+
+func _on_source_viewer_glyph_removed(id: int) -> void:
+	Database.glyph_remove(id)
