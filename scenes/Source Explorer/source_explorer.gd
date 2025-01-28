@@ -14,7 +14,7 @@ func _ready() -> void:
 			%Create.set_pressed_no_signal(true)
 	var sources := Database.sources_db.list()
 	for source in sources:
-		var texture = Database.texture_cache.get_thumbnail(source.path)
+		var texture = Database.get_thumbnail(source.path)
 		var button := TextureButton.new()
 		button.texture_normal = texture
 		button.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
@@ -63,18 +63,18 @@ func _on_source_viewer_glyph_location_removed(id: int, rect: Rect2) -> void:
 
 
 func _on_next_pressed() -> void:
-	var next = wrapi(viewer.selected+1, 0, Database.glyph_db.glyphs.size())
+	var next = wrapi(viewer.selected+1, 0, Database.glyph_count())
 	viewer.select(next)
 	%Selected.text = str(next)
 
 
 func _on_prev_pressed() -> void:
-	var prev = wrapi(viewer.selected-1, 0, Database.glyph_db.glyphs.size())
+	var prev = wrapi(viewer.selected-1, 0, Database.glyph_count())
 	viewer.select(prev)
 	%Selected.text = str(prev)
 
 
 func _on_selected_text_submitted(new_text: String) -> void:
-	var number = wrapi(int(new_text), 0, Database.glyph_db.glyphs.size())
+	var number = wrapi(int(new_text), 0, Database.glyph_count())
 	viewer.select(number)
 	%Selected.text = str(number)

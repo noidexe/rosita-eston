@@ -23,9 +23,10 @@ func get_aspect_ratio():
 
 func set_source( p_source : Database.Source ):
 	source = p_source
-	$source.texture = Database.texture_cache.get_texture(p_source.path)
-	get_viewport().size_2d_override = $source.texture.get_size()
-	center = $source.get_rect().get_center()
+	$source.texture = Database.get_texture(p_source.path)
+	var texture_rect : Rect2 = $source.get_rect()
+	get_viewport().size_2d_override = texture_rect.size
+	center = texture_rect.get_center()
 	$camera.position = center
 	_update_display()
 
@@ -35,14 +36,21 @@ func _input(event: InputEvent) -> void:
 	var texture_pos = $source.to_local(get_global_mouse_position())
 	if event.is_pressed() and event is InputEventMouseButton:
 		if (event as InputEventMouseButton).button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			var old_mouse_pos = get_global_mouse_position()
 			$camera.zoom *= 0.9
-			$camera.position = $camera.position.lerp(center, 0.05)
+			# Undo mouse drift
+			$camera.position -= get_global_mouse_position() - old_mouse_pos
 			if $camera.zoom.x < 1:
 				$camera.zoom = Vector2.ONE
 				$camera.position = center
 		elif (event as InputEventMouseButton).button_index == MOUSE_BUTTON_WHEEL_UP:
+			var old_mouse_pos = get_global_mouse_position()
 			$camera.zoom *= 1.1
-			$camera.position = $camera.position.lerp(get_global_mouse_position(), 0.2)
+			# Undo mouse drift
+			$camera.position -= get_global_mouse_position() - old_mouse_pos
+	if event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
+		var motion_event := (event as InputEventMouseMotion)
+		$camera.position -= motion_event.relative / $camera.zoom
 	
 	if mode == Mode.CREATE:
 		if event is InputEventMouseButton and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
@@ -97,8 +105,8 @@ func _draw() -> void:
 			_rect.position -= Vector2i(2,2)
 			draw_rect(_rect, Color.RED if id == selected else Color.WHITE, false, 2)
 			var text_pos = _rect.position + Vector2i(10,25)
-			draw_string(font, text_pos, str(id),HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Color.BLACK )
-			text_pos += Vector2i(-1,-2)
+			draw_string(font, text_pos, str(id),HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color.BLACK )
+			text_pos += Vector2i(-1,-1)
 			draw_string(font, text_pos, str(id),HORIZONTAL_ALIGNMENT_LEFT, -1, 20 )
 			var glyph = Database.glyph_get(id)
 			if not glyph:
@@ -108,7 +116,7 @@ func _draw() -> void:
 				continue
 			text_pos += Vector2i(0, -30)
 			draw_string(font, text_pos, str(glyph.definitions.front()),HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color.BLACK )
-			text_pos += Vector2i(-2, -2)
+			text_pos += Vector2i(-1, -1)
 			draw_string(font, text_pos, str(glyph.definitions.front()),HORIZONTAL_ALIGNMENT_LEFT, -1, 20 )
 	if dragging:
 		draw_rect( Rect2(drag_start_pos, drag_end_pos - drag_start_pos), Color.YELLOW, false, 3 )

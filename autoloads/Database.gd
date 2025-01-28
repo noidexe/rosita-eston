@@ -293,6 +293,17 @@ func glyph_remove(id : int) -> bool:
 func glyph_get(id: int) -> Glyph:
 	return glyph_db.get_at(id)
 
+## Returns amount of glyphs in the db
+func glyph_count() -> int:
+	return glyph_db.size()
+
+#====[ source and glyph display ]#
+func get_texture(path : String) -> Texture2D:
+	return texture_cache.get_texture(path)
+
+func get_thumbnail(path : String) -> Texture2D:
+	return texture_cache.get_thumbnail(path)
+
 ##[ Helper Funcs ]##
 
 static func extract_words( sentence : String) -> PackedStringArray:
@@ -305,7 +316,6 @@ static func extract_words( sentence : String) -> PackedStringArray:
 		words.append(m.get_string())
 	return words
 
-
 #[ IMPLEMENTATION ]#
 
 ## A Database of Glyphs
@@ -314,6 +324,10 @@ static func extract_words( sentence : String) -> PackedStringArray:
 class GlyphDB extends RefCounted:
 	var glyphs : Array[Glyph] = [Glyph.new(0)]
 	var free_ids : Dictionary[int, bool] = {}
+	
+	func size():
+		return glyphs.size()
+	
 	func create() -> Glyph:
 		var id : int = _get_free_id()
 		var glyph = Glyph.new(id)
@@ -609,8 +623,8 @@ class TextureCache extends RefCounted:
 		if textures.has(path):
 			return
 		var full_path : String = base_path.path_join(path)
-		var image : Image = Image.load_from_file(full_path)
-		var texture : ImageTexture = ImageTexture.create_from_image(image)
+		var image : Image = Image.load_from_file(full_path) if FileAccess.file_exists(full_path) else null
+		var texture : Texture2D = ImageTexture.create_from_image(image) if image else preload("uid://cc27nwruufj0o")
 		if textures.size() >= MAX_TEXTURES:
 			textures.erase(textures.keys().front())
 		textures[path] = texture
@@ -628,10 +642,12 @@ class TextureCache extends RefCounted:
 		if FileAccess.file_exists(full_path_thumb):
 			image = Image.load_from_file(full_path_thumb)
 		else:
-			image = Image.load_from_file(base_path.path_join(path))
-			image.resize(200,113,Image.INTERPOLATE_LANCZOS)
-			image.save_jpg(full_path_thumb, 0.85)
-		var texture : ImageTexture = ImageTexture.create_from_image(image)
+			var texture_full_path = base_path.path_join(path)
+			image = Image.load_from_file(texture_full_path) if FileAccess.file_exists(texture_full_path) else null
+			if image:
+				image.resize(200,113,Image.INTERPOLATE_LANCZOS)
+				image.save_jpg(full_path_thumb, 0.85)
+		var texture : Texture2D = ImageTexture.create_from_image(image) if image else preload("uid://cc27nwruufj0o")
 		if thumbnails.size() >= MAX_THUMBNAIS:
 			thumbnails.erase(thumbnails.keys().front())
 		thumbnails[path] = texture
@@ -648,7 +664,6 @@ var definition_db: DefinitionDB
 
 ## Active instance of WordDB
 var word_db : WordDB
-
 
 var texture_cache : TextureCache = TextureCache.new(DEFAULT_DB_PATH.path_join(SOURCE_DB_FOLDER))
 

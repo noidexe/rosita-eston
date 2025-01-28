@@ -4,6 +4,7 @@
 
 [sub_resource type="SystemFont" id="SystemFont_g5f4l"]
 font_names = PackedStringArray("Sans-Serif")
+subpixel_positioning = 0
 
 [node name="SourceViewer" type="Node2D"]
 script = ExtResource("1_g5f4l")

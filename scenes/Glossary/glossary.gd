@@ -44,7 +44,7 @@ func edit_entry(glyph : Database.Glyph):
 		texture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		texture.size_flags_horizontal = Control.SIZE_FILL
 		texture.size_flags_horizontal = Control.SIZE_FILL
-		texture.texture = Database.texture_cache.get_thumbnail(location.path)
+		texture.texture = Database.get_thumbnail(location.path)
 		%Sources.add_child(texture)
 
 func _on_perfect_toggled(_toggled_on: bool) -> void:

@@ -39,7 +39,7 @@ func _update_display():
 	else:
 		var first_location = glyph.locations.front()
 		var atlas_tex = AtlasTexture.new()
-		atlas_tex.atlas = Database.texture_cache.get_texture(first_location.path)
+		atlas_tex.atlas = Database.get_texture(first_location.path)
 		atlas_tex.region = first_location.rect
 		%Glyph.texture = atlas_tex
 
