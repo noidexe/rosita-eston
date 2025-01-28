@@ -5,10 +5,9 @@ const DEFAULT_DB_PATH = "user://database"
 const GLYPH_DB_FILENAME = "glyph_db.json"
 const SOURCE_DB_FOLDER = "sources"
 
-#[ PUBLIC API ]#
+#region PUBLIC API
 
-#==[ Signals ]#
-
+#region Event Bus
 @warning_ignore("unused_signal")
 signal glyph_added( glyph_id: int )
 
@@ -34,10 +33,9 @@ signal definition_removed( glyph_id: int, definition : String)
 signal save_started()
 @warning_ignore("unused_signal")
 signal save_complete()
+#endregion
 
-
-#==[ Inner Classes ]#
-
+#region Inner Classes
 ## Defines a search query in the glossary
 class GlossarySearchQuery extends RefCounted:
 	enum SortMode { NONE, ID, FREQUENCY }
@@ -177,13 +175,9 @@ class Location extends RefCounted:
 		var dict_rect = dict["rect"]
 		var _rect := Rect2i(dict_rect.x, dict_rect.y, dict_rect.w, dict_rect.h)
 		return Location.new( dict["path"], _rect )
+#endregion
 
-
-
-#==[ Public Methods ]#
-
-#====[ I/O ]#
-
+#region I/O
 ## Initializes the database
 func db_create() -> Error:
 	var db_path : String = DEFAULT_DB_PATH.path_join(GLYPH_DB_FILENAME)
@@ -274,9 +268,9 @@ func db_save() -> Error:
 	print("Saved in %ss" % (0.001 * (Time.get_ticks_msec() - start_time) ))
 	save_complete.emit()
 	return err
+#endregion
 
-#====[ Search ]#
-
+#region Search
 ## Returns an array of glyphs
 func glossary_search(query : GlossarySearchQuery) -> Array[Glyph]:
 	var result : Array[Glyph] = []
@@ -299,9 +293,9 @@ func glossary_search(query : GlossarySearchQuery) -> Array[Glyph]:
 		result.sort_custom(func(a: Glyph, b: Glyph): return a.locations.size() > b.locations.size() )
 
 	return result
+#endregion
 
-#====[ Glyph handling ]#
-
+#region Glyph Handling
 ## Adds a glyph to the GlyphDB
 func glyph_add() -> Glyph:
 	var glyph := glyph_db.create()
@@ -324,16 +318,17 @@ func glyph_get(id: int) -> Glyph:
 ## Returns amount of glyphs in the db
 func glyph_count() -> int:
 	return glyph_db.size()
+#endregion
 
-#====[ source and glyph display ]#
+#region Texture retrieval
 func get_texture(path : String) -> Texture2D:
 	return texture_cache.get_texture(path)
 
 func get_thumbnail(path : String) -> Texture2D:
 	return texture_cache.get_thumbnail(path)
+#endregion
 
-##[ Helper Funcs ]##
-
+#region Helper Funcs
 static func extract_words( sentence : String) -> PackedStringArray:
 	var regex := RegEx.create_from_string(r"(\b[^\s]+\b)")
 	var matches : = regex.search_all(sentence)
@@ -343,8 +338,18 @@ static func extract_words( sentence : String) -> PackedStringArray:
 	for m : RegExMatch in matches:
 		words.append(m.get_string())
 	return words
+#endregion
 
-#[ IMPLEMENTATION ]#
+#endregion
+
+#region IMPLEMENTATION
+
+# The GlphDB is the main source of truth and handles creating/removing and editing
+# Glyph objects. DefinitionDB, WordDB and SourceDB are all built at runtime and used
+# For reverse lookup. 
+# TextureCache is used to retrieve the textures corresponding to glyphs and sources
+
+#region Inner Classes
 
 ## A Database of Glyphs
 ## [br]
@@ -451,7 +456,6 @@ class GlyphDB extends RefCounted:
 		if glyphs[id].is_destroyed:
 			remove(id)
 
-
 ## A database of definitons
 ## [br]
 ## Built from GlyphDB. Allows for fast definition->glyphs reverse lookups
@@ -503,7 +507,6 @@ class DefinitionDB extends RefCounted:
 			if include:
 				ret += get_glyph_ids(def)
 		return ret
-
 
 ## A database of words
 ## [br]
@@ -560,7 +563,6 @@ class WordDB extends RefCounted:
 		word = word.to_lower()
 		return words.get(word, [])
 
-
 class Source extends RefCounted:
 	var path : String = ""
 	var rects : Dictionary[Rect2i, int] = {}
@@ -584,7 +586,6 @@ class Source extends RefCounted:
 	
 	func remove_rect( rect : Rect2i):
 		rects.erase(rect)
-
 
 class SourcesDB extends RefCounted:
 	var sources : Dictionary[String,Source] = {}
@@ -689,8 +690,9 @@ class TextureCache extends RefCounted:
 		if thumbnails.size() >= MAX_THUMBNAIS:
 			thumbnails.erase(thumbnails.keys().front())
 		thumbnails[path] = texture
+#endregion
 
-
+#region Member Props
 ## Active instance of GlyphDB
 var glyph_db: GlyphDB
 
@@ -704,6 +706,7 @@ var definition_db: DefinitionDB
 var word_db : WordDB
 
 var texture_cache : TextureCache = TextureCache.new(DEFAULT_DB_PATH.path_join(SOURCE_DB_FOLDER))
+#endregion
 
 func _ready() -> void:
 	get_tree().auto_accept_quit = false
@@ -723,6 +726,7 @@ func _notification(what: int) -> void:
 		await db_save()
 		get_tree().quit()
 
+# Used for testing
 func _add_random_glyph():
 	var lorem_packed := "Lorem ipsum odor amet, consectetuer adipiscing elit. Penatibus etiam lacinia placerat quisque nullam pretium. Tristique bibendum potenti fringilla placerat fusce faucibus vitae nostra nisl. Elementum nascetur aliquam facilisi molestie quisque. Interdum felis eros rhoncus gravida inceptos dis! Eleifend nulla lectus justo duis orci ex; eget turpis a. Pretium augue tristique parturient per fames ad euismod semper. Ex justo fames eleifend rhoncus orci feugiat. Ipsum ultricies orci aenean integer ad purus. Erat habitasse curae egestas orci duis eleifend eleifend. Nostra aptent ad dapibus nunc orci imperdiet condimentum aliquam morbi. Nunc facilisis odio mi, aptent tristique sem sodales. Euismod facilisis suspendisse sit dui curabitur fusce non taciti. Per curae ultricies primis erat egestas sit duis! Conubia litora torquent maximus faucibus class lacinia.".split(" ")
 	var lorem : Array = lorem_packed
@@ -732,3 +736,4 @@ func _add_random_glyph():
 		for j in randi_range(1, 6):
 			sentence += lorem.pick_random() + " "
 		glyph.definition_add(sentence)
+#endregion
