@@ -1,4 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://cm7nt1r5rwjrc"]
+[gd_scene load_steps=4 format=3 uid="uid://cm7nt1r5rwjrc"]
+
+[ext_resource type="Script" uid="uid://bl163ir44oa38" path="res://scenes/Source Explorer/source_explorer.gd" id="1_v3bfa"]
+[ext_resource type="PackedScene" uid="uid://dtxgehkbutxbv" path="res://scenes/Source Explorer/source_viewer.tscn" id="2_bp0f1"]
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_76mm2"]
 
@@ -10,15 +13,18 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+script = ExtResource("1_v3bfa")
 
-[node name="Thumbnails" type="ScrollContainer" parent="."]
+[node name="ThumbnailsContainer" type="ScrollContainer" parent="."]
 layout_mode = 2
+size_flags_vertical = 0
 vertical_scroll_mode = 0
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Thumbnails"]
+[node name="Thumbnails" type="HBoxContainer" parent="ThumbnailsContainer"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
-size_flags_vertical = 3
+size_flags_horizontal = 3
 
 [node name="SourceExplorer" type="HBoxContainer" parent="."]
 layout_mode = 2
@@ -53,7 +59,19 @@ text = "Erase"
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
+stretch = true
 
-[node name="GlypEditorContainer" type="Control" parent="SourceExplorer"]
+[node name="SubViewport" type="SubViewport" parent="SourceExplorer/Viewport"]
+handle_input_locally = false
+size = Vector2i(1084, 544)
+size_2d_override_stretch = true
+render_target_update_mode = 4
+
+[node name="SourceViewer" parent="SourceExplorer/Viewport/SubViewport" instance=ExtResource("2_bp0f1")]
+position = Vector2(64, 104)
+
+[node name="GlyphEditorContainer" type="Control" parent="SourceExplorer"]
 unique_name_in_owner = true
 layout_mode = 2
+
+[connection signal="rect_selected" from="SourceExplorer/Viewport/SubViewport/SourceViewer" to="." method="_on_source_viewer_rect_selected"]

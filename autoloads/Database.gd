@@ -562,8 +562,10 @@ class SourcesDB extends RefCounted:
 
 class TextureCache extends RefCounted:
 	const MAX_TEXTURES := 20
+	const MAX_THUMBNAIS := 100
 	var base_path : String = ""
 	var textures : Dictionary[String,Texture2D] = {}
+	var thumbnails : Dictionary[String, Texture2D] = {}
 	
 	func _init(p_base_path : String) -> void:
 		assert(p_base_path.is_absolute_path())
@@ -571,17 +573,43 @@ class TextureCache extends RefCounted:
 		textures[base_path] = Texture2D.new()
 	
 	func get_texture( path: String ) -> Texture2D:
-		return _get_or_load(base_path.path_join(path))
+		_load_texture_if_needed(path)
+		return textures[path]
 	
-	func _get_or_load( full_path : String):
-		if textures.has(full_path):
-			return textures[full_path]
+	func get_thumbnail( path: String ) -> Texture2D:
+		_load_thumb_if_needed(path)
+		return thumbnails[path]
+	
+	func _load_texture_if_needed( path : String):
+		if textures.has(path):
+			return
+		var full_path : String = base_path.path_join(path)
 		var image : Image = Image.load_from_file(full_path)
 		var texture : ImageTexture = ImageTexture.create_from_image(image)
 		if textures.size() >= MAX_TEXTURES:
 			textures.erase(textures.keys().front())
-		textures[full_path] = texture
-		return texture
+		textures[path] = texture
+	
+	func _load_thumb_if_needed( path : String ):
+		if thumbnails.has(path):
+			return
+		var thumbs_dir := base_path.path_join("thumbnails")
+		# Create thumbnails dir if needed
+		if not DirAccess.dir_exists_absolute(thumbs_dir):
+			DirAccess.make_dir_recursive_absolute(thumbs_dir)
+		var full_path_thumb := thumbs_dir.path_join(path)
+		var image : Image
+		# Try loading the thumb from disk, otherwise generate it and save it
+		if FileAccess.file_exists(full_path_thumb):
+			image = Image.load_from_file(full_path_thumb)
+		else:
+			image = Image.load_from_file(base_path.path_join(path))
+			image.resize(200,113,Image.INTERPOLATE_LANCZOS)
+			image.save_jpg(full_path_thumb, 0.85)
+		var texture : ImageTexture = ImageTexture.create_from_image(image)
+		if thumbnails.size() >= MAX_THUMBNAIS:
+			thumbnails.erase(thumbnails.keys().front())
+		thumbnails[path] = texture
 
 
 ## Active instance of GlyphDB
