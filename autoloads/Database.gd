@@ -297,15 +297,16 @@ class GlyphDB extends RefCounted:
 		glyphs[id] = glyph
 		return glyph
 	func remove(id : int) -> bool:
-		if not id > 0 and id < glyphs.size():
+		if not(id > 0 and id < glyphs.size()):
 			return false
 		if glyphs[id] == null:
 			return false
 		glyphs[id] = null
 		free_ids[id] = true
 		return true
+
 	func get_at(id : int) -> Glyph:
-		if not id > 0 and id < glyphs.size():
+		if not(id > 0 and id < glyphs.size()):
 			return null
 		return glyphs[id]
 	
