@@ -24,7 +24,7 @@ func _update_display():
 		await ready
 	if glyph == null:
 		return
-	if glyph.destroyed:
+	if glyph.is_destroyed:
 		queue_free()
 		return
 	%Id.text = str(glyph.id).pad_zeros(5)

@@ -51,7 +51,7 @@ class GlossarySearchQuery extends RefCounted:
 ## A Glyph is a character or sequence of characters treated as a unit
 class Glyph extends RefCounted:
 	signal changed
-	var destroyed := false
+	var is_destroyed := false
 	var orphan : bool:
 		set(v):
 			push_error("Read-only")
@@ -65,12 +65,15 @@ class Glyph extends RefCounted:
 		id = p_id
 	
 	func destroy() -> void:
-		destroyed = true
+		if id == 0:
+			return
+		is_destroyed = true
 		_emit_changed()
 		for i in locations.size():
 			locations_remove(i)
 		for i in definitions.size():
 			definition_remove(i)
+		Database.glyph_remove(id)
 
 	func locations_add ( path : String, rect : Rect2 ):
 		var location := Location.new(path, rect)
@@ -341,7 +344,7 @@ static func extract_words( sentence : String) -> PackedStringArray:
 class GlyphDB extends RefCounted:
 	var glyphs : Array[Glyph] = [Glyph.new(0)]
 	var free_ids : Dictionary[int, bool] = {}
-	
+
 	func size():
 		return glyphs.size()
 	
@@ -350,6 +353,7 @@ class GlyphDB extends RefCounted:
 		var glyph = Glyph.new(id)
 		glyphs[id] = glyph
 		return glyph
+
 	func remove(id : int) -> bool:
 		if not(id > 0 and id < glyphs.size()):
 			return false

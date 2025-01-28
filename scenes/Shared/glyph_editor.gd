@@ -27,7 +27,7 @@ func _update_display():
 		%Id.text = str(0)
 		%Glyph.texture = null
 		return 
-	if glyph.destroyed:
+	if glyph.is_destroyed:
 		queue_free()
 		return
 
