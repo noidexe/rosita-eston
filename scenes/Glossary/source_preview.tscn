@@ -1,0 +1,12 @@
+[gd_scene load_steps=2 format=3 uid="uid://7yslra30tunh"]
+
+[ext_resource type="Script" uid="uid://ceh3veg0q4p40" path="res://scenes/Glossary/source_preview.gd" id="1_0oelx"]
+
+[node name="SourcePreview" type="TextureRect"]
+offset_right = 40.0
+offset_bottom = 40.0
+expand_mode = 5
+stretch_mode = 5
+script = ExtResource("1_0oelx")
+
+[connection signal="gui_input" from="." to="." method="_on_gui_input"]

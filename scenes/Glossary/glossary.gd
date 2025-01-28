@@ -2,6 +2,7 @@ extends VBoxContainer
 class_name Glossary
 
 signal glyph_selected(glyph: Database.Glyph)
+signal source_selected(path: String)
 
 func _on_query_text_submitted(new_text: String) -> void:
 	var query := Database.GlossarySearchQuery.new()
@@ -40,12 +41,9 @@ func edit_entry(glyph : Database.Glyph):
 		if location.path in used_paths:
 			continue
 		used_paths.append(location.path)
-		var texture = TextureRect.new()
-		texture.expand_mode = TextureRect.EXPAND_FIT_HEIGHT_PROPORTIONAL
-		texture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		texture.size_flags_horizontal = Control.SIZE_FILL
-		texture.size_flags_horizontal = Control.SIZE_FILL
+		var texture : TextureRect = preload("uid://7yslra30tunh").instantiate()
 		texture.texture = Database.get_thumbnail(location.path)
+		texture.selected.connect(source_selected.emit.bind(location.path))
 		%Sources.add_child(texture)
 
 func _on_perfect_toggled(_toggled_on: bool) -> void:

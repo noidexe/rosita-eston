@@ -34,6 +34,9 @@ func _ready() -> void:
 		tool_instances[key] = tool_scene
 	
 	(tool_instances[Tools.GLOSSARY] as Glossary).glyph_selected.connect((tool_instances[Tools.SOURCES] as SourceExplorer)._on_glyph_selected)
+	(tool_instances[Tools.GLOSSARY] as Glossary).source_selected.connect(func(path):
+		_on_tool_selected(Tools.SOURCES)
+		(tool_instances[Tools.SOURCES] as SourceExplorer)._on_thumb_selected(path))
 
 func _set_ui_scale():
 	get_window().content_scale_factor = DisplayServer.screen_get_dpi() / 96.0

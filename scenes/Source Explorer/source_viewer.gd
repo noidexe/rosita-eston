@@ -8,6 +8,7 @@ var drag_start_pos := Vector2()
 var drag_end_pos := Vector2()
 var dragging := false
 var selected := 0
+var hide_annotations := false
 
 var source : Database.Source
 var center : Vector2 = Vector2.ZERO
@@ -30,10 +31,17 @@ func set_source( p_source : Database.Source ):
 	$camera.position = center
 	_update_display()
 
+func _ready() -> void:
+	Database.definition_added.connect(_update_display.unbind(2))
+	Database.definition_removed.connect(_update_display.unbind(2))
+
 func _input(event: InputEvent) -> void:
-	
 	if not source:
 		return
+	if event is InputEventKey and (event as InputEventKey).physical_keycode == KEY_SHIFT:
+		hide_annotations = event.is_pressed()
+		_update_display()
+
 	var texture_pos = $source.to_local(get_global_mouse_position())
 	if event.is_pressed() and event is InputEventMouseButton:
 		if (event as InputEventMouseButton).button_index == MOUSE_BUTTON_WHEEL_DOWN:
@@ -100,7 +108,7 @@ func select(id: int):
 	_update_display()
 
 func _draw() -> void:
-	if source:
+	if source and not hide_annotations:
 		for rect in source.rects.keys():
 			var _rect = rect
 			var id = source.rects[rect]
@@ -109,9 +117,9 @@ func _draw() -> void:
 			_rect.position -= Vector2i(1,1)
 			draw_rect(_rect, Color.RED if id == selected else Color.WHITE, false, 1)
 			var text_pos = _rect.position + Vector2i(4,12)
-			draw_string(font, text_pos, str(id),HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color.BLACK )
+			draw_string(font, text_pos, str(id),HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color.BLACK )
 			text_pos += Vector2i(-1,-1)
-			draw_string(font, text_pos, str(id),HORIZONTAL_ALIGNMENT_LEFT, -1, 10 )
+			draw_string(font, text_pos, str(id),HORIZONTAL_ALIGNMENT_LEFT, -1, 8 )
 			var glyph = Database.glyph_get(id)
 			if not glyph:
 				continue

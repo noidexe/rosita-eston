@@ -78,9 +78,18 @@ func _on_prev_pressed() -> void:
 
 
 func _on_selected_text_submitted(new_text: String) -> void:
-	var number = wrapi(int(new_text), 0, Database.glyph_count())
-	viewer.select(number)
-	%Selected.text = str(number)
+	var id = 0
+	if new_text.is_valid_int():
+		id = wrapi(int(new_text), 0, Database.glyph_count())
+	else:
+		var query := Database.GlossarySearchQuery.new()
+		query.string = new_text
+		query.perfect_match = true
+		var result = Database.glossary_search(query)
+		if not result.is_empty():
+			id = result.front().id
+	viewer.select(id)
+	%Selected.text = str(id)
 
 func _on_glyph_selected( glyph : Database.Glyph):
 	if glyph == null:
