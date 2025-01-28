@@ -30,6 +30,12 @@ signal definition_added( glyph_id: int, definition : String)
 @warning_ignore("unused_signal")
 signal definition_removed( glyph_id: int, definition : String)
 
+@warning_ignore("unused_signal")
+signal save_started()
+@warning_ignore("unused_signal")
+signal save_complete()
+
+
 #==[ Inner Classes ]#
 
 ## Defines a search query in the glossary
@@ -225,23 +231,27 @@ func db_load() -> Error:
 	sources_db = SourcesDB.new(glyph_db)
 	sources_db.add_sources_from_paths(DirAccess.get_files_at(sources_path))
 	err = OK
-	print("Total time: %ss" % (0.001 * (Time.get_ticks_msec()-start_time )))
+	print("Loaded in %ss" % (0.001 * (Time.get_ticks_msec()-start_time )))
 	return err
 
 ## Saves the database
 func db_save() -> Error:
+	save_started.emit()
+	await get_tree().process_frame
+	
 	var start_time := Time.get_ticks_msec()
 	var db_path : String = DEFAULT_DB_PATH.path_join(GLYPH_DB_FILENAME)
 	var err := ERR_BUG
-
+	if FileAccess.file_exists(db_path):
+		var ext = db_path.get_extension()
+		var basename = db_path.get_basename()
+		DirAccess.copy_absolute(db_path, basename + "[backup]." + ext)
 	var file = FileAccess.open(db_path, FileAccess.WRITE)
 	err = FileAccess.get_open_error()
-	if not err == OK:
-		return err
-	
-	file.store_string(glyph_db.serialize())
-	err = OK
+	if err == OK:
+		file.store_string(glyph_db.serialize())
 	print("Saved in %ss" % (0.001 * (Time.get_ticks_msec() - start_time) ))
+	save_complete.emit()
 	return err
 
 #====[ Search ]#
@@ -647,7 +657,7 @@ func _ready() -> void:
 	assert(err == OK)
 	
 	var timer := Timer.new()
-	timer.wait_time = 20
+	timer.wait_time = 60
 	timer.autostart = true
 	timer.one_shot = false
 	timer.timeout.connect(db_save)

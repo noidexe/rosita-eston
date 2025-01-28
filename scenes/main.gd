@@ -11,6 +11,12 @@ var tool_instances : Dictionary[Tools, Node] = {}
 
 func _ready() -> void:
 	_set_ui_scale()
+	
+	$saving.hide()
+	Database.save_started.connect($saving.show)
+	Database.save_complete.connect($saving.hide)
+	
+	
 	for node in %ToolBar.get_children():
 		%ToolBar.remove_child(node)
 
