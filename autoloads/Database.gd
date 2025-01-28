@@ -40,10 +40,12 @@ signal save_complete()
 
 ## Defines a search query in the glossary
 class GlossarySearchQuery extends RefCounted:
+	enum SortMode { NONE, ID, FREQUENCY }
 	var string : String
 	var perfect_match : bool
 	var match_all_words : bool
 	var match_any_words : bool
+	var sort_mode := SortMode.NONE
 
 
 ## Data Structure to handle Glyphs
@@ -281,15 +283,22 @@ func glossary_search(query : GlossarySearchQuery) -> Array[Glyph]:
 	var result : Array[Glyph] = []
 	var ids : Array[int] = []
 	if query.string.is_empty():
-		return glyph_db.get_all()
-	query.string = query.string.to_lower()
-	if query.perfect_match:
-		ids += definition_db.get_glyph_ids(query.string)
-	if query.match_all_words:
-		ids += definition_db.get_glyph_ids_wordset(RositaDB.extract_words(query.string))
-	if query.match_any_words:
-		ids += word_db.get_glyph_ids_from_sentece(query.string)
-	result = glyph_db.get_from_ids(ids)
+		result = glyph_db.get_all()
+	else:
+		query.string = query.string.to_lower()
+		if query.perfect_match:
+			ids += definition_db.get_glyph_ids(query.string)
+		if query.match_all_words:
+			ids += definition_db.get_glyph_ids_wordset(RositaDB.extract_words(query.string))
+		if query.match_any_words:
+			ids += word_db.get_glyph_ids_from_sentece(query.string)
+		result = glyph_db.get_from_ids(ids)
+	
+	if query.sort_mode == GlossarySearchQuery.SortMode.ID:
+		result.sort_custom(func(a: Glyph, b: Glyph): return a.id < b.id )
+	elif query.sort_mode == GlossarySearchQuery.SortMode.FREQUENCY:
+		result.sort_custom(func(a: Glyph, b: Glyph): return a.locations.size() > b.locations.size() )
+
 	return result
 
 #====[ Glyph handling ]#

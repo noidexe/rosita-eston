@@ -49,6 +49,14 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Any Words"
 
+[node name="Label" type="Label" parent="SearchBox"]
+layout_mode = 2
+text = "Sort:"
+
+[node name="Sort" type="OptionButton" parent="SearchBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
 [node name="Content" type="HBoxContainer" parent="."]
 unique_name_in_owner = true
 layout_mode = 2
@@ -95,3 +103,4 @@ size_flags_vertical = 3
 [connection signal="toggled" from="SearchBox/Perfect" to="." method="_on_perfect_toggled"]
 [connection signal="toggled" from="SearchBox/AllWords" to="." method="_on_all_words_toggled"]
 [connection signal="toggled" from="SearchBox/AnyWords" to="." method="_on_any_words_toggled"]
+[connection signal="item_selected" from="SearchBox/Sort" to="." method="_on_sort_item_selected"]
