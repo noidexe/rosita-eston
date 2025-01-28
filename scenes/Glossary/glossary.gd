@@ -34,7 +34,11 @@ func edit_entry(glyph : Database.Glyph):
 	glyph_selected.emit(glyph)
 	for child in %Sources.get_children():
 		child.queue_free()
+	var used_paths := []
 	for location in glyph.locations:
+		if location.path in used_paths:
+			continue
+		used_paths.append(location.path)
 		var texture = TextureRect.new()
 		texture.expand_mode = TextureRect.EXPAND_FIT_HEIGHT_PROPORTIONAL
 		texture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED

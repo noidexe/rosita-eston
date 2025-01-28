@@ -18,24 +18,27 @@ func _on_gui_input(event: InputEvent) -> void:
 		selected.emit()
 
 func _update_display():
+	if is_queued_for_deletion():
+		return
+	if not is_inside_tree():
+		await ready
 	if glyph == null:
 		return
 	if glyph.destroyed:
 		queue_free()
 		return
-	if not is_inside_tree():
-		await ready
 	%Id.text = str(glyph.id).pad_zeros(5)
-	var defs_text = ""
+	var defs_text = "[ORPHAN!]" if glyph.orphan else ""
 	for def in glyph.definitions:
 		defs_text += def
 		defs_text += ", "
 	defs_text = defs_text.trim_suffix(", ")
 	%Definitions.text = defs_text
-	var first_location = glyph.locations.front()
-	if first_location == null:
+	if glyph.orphan:
 		%Glyph.texture = null
-	var atlas_tex = AtlasTexture.new()
-	atlas_tex.atlas = Database.texture_cache.get_texture(first_location.path)
-	atlas_tex.region = first_location.rect
-	%Glyph.texture = atlas_tex
+	else:
+		var first_location = glyph.locations.front()
+		var atlas_tex = AtlasTexture.new()
+		atlas_tex.atlas = Database.texture_cache.get_texture(first_location.path)
+		atlas_tex.region = first_location.rect
+		%Glyph.texture = atlas_tex

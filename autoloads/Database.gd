@@ -46,6 +46,11 @@ class GlossarySearchQuery extends RefCounted:
 class Glyph extends RefCounted:
 	signal changed
 	var destroyed := false
+	var orphan : bool:
+		set(v):
+			push_error("Read-only")
+		get():
+			return locations.is_empty()
 	var id : int = 0 # TODO: Implement NullGlyph extends Glyph with id 0
 	var locations : Array[Location]= []
 	var definitions : Array[String]= []
@@ -70,6 +75,14 @@ class Glyph extends RefCounted:
 	func locations_remove ( index : int ):
 		var location : Location = locations.pop_at( index )
 		Database.location_removed.emit(id, location)
+		#if orphan:
+			#destroy()
+	
+	func locations_remove_rect ( rect : Rect2i ):
+		for i in locations.size():
+			if locations[i].rect == rect:
+				locations_remove(i)
+				break
 
 	func definition_add( def: String ) -> int:
 		definitions.append(def)

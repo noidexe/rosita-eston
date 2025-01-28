@@ -42,20 +42,39 @@ func _on_erase_pressed() -> void:
 	viewer.mode = SourceViewer.Mode.REMOVE
 
 
-func _on_source_viewer_rect_selected(rect: Rect2) -> void:
-	var glyph : Database.Glyph = Database.glyph_add()
+func _on_source_viewer_rect_selected(rect: Rect2, id : int) -> void:
+	var glyph : Database.Glyph = Database.glyph_get(id) if id != 0 else Database.glyph_add()
 	glyph.locations_add(current_path, rect)
-	viewer.selected = glyph.id
+	viewer.select(glyph.id)
 
 
 func _on_source_viewer_glyph_selected(id: int) -> void:
 	for child in %GlyphEditorContainer.get_children():
 		child.queue_free()
-	var glyph = Database.glyph_db.get_at(id)
+	var glyph = Database.glyph_get(id)
 	var glyph_editor : GlyphEditor = preload("uid://bw5ts2cyuaquo").instantiate()
 	%GlyphEditorContainer.add_child(glyph_editor)
 	glyph_editor.glyph = glyph
 
 
-func _on_source_viewer_glyph_removed(id: int) -> void:
-	Database.glyph_remove(id)
+func _on_source_viewer_glyph_location_removed(id: int, rect: Rect2) -> void:
+	var glyph = Database.glyph_get(id)
+	glyph.locations_remove_rect(rect)
+
+
+func _on_next_pressed() -> void:
+	var next = wrapi(viewer.selected+1, 0, Database.glyph_db.glyphs.size())
+	viewer.select(next)
+	%Selected.text = str(next)
+
+
+func _on_prev_pressed() -> void:
+	var prev = wrapi(viewer.selected-1, 0, Database.glyph_db.glyphs.size())
+	viewer.select(prev)
+	%Selected.text = str(prev)
+
+
+func _on_selected_text_submitted(new_text: String) -> void:
+	var number = wrapi(int(new_text), 0, Database.glyph_db.glyphs.size())
+	viewer.select(number)
+	%Selected.text = str(number)

@@ -80,15 +80,41 @@ render_target_update_mode = 4
 [node name="SourceViewer" parent="SourceExplorer/AspectRatioContainer/Viewport/SubViewport" instance=ExtResource("2_bp0f1")]
 position = Vector2(64, 104)
 
-[node name="GlyphEditorContainer" type="ScrollContainer" parent="SourceExplorer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="SourceExplorer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="SourceExplorer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Prev" type="Button" parent="SourceExplorer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Previous"
+
+[node name="Next" type="Button" parent="SourceExplorer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Next
+"
+
+[node name="Selected" type="LineEdit" parent="SourceExplorer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="GlyphEditorContainer" type="ScrollContainer" parent="SourceExplorer/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
 [connection signal="pressed" from="SourceExplorer/Toolbar/Select" to="." method="_on_select_pressed"]
 [connection signal="pressed" from="SourceExplorer/Toolbar/Create" to="." method="_on_create_pressed"]
 [connection signal="pressed" from="SourceExplorer/Toolbar/Erase" to="." method="_on_erase_pressed"]
-[connection signal="glyph_removed" from="SourceExplorer/AspectRatioContainer/Viewport/SubViewport/SourceViewer" to="." method="_on_source_viewer_glyph_removed"]
+[connection signal="glyph_location_removed" from="SourceExplorer/AspectRatioContainer/Viewport/SubViewport/SourceViewer" to="." method="_on_source_viewer_glyph_location_removed"]
 [connection signal="glyph_selected" from="SourceExplorer/AspectRatioContainer/Viewport/SubViewport/SourceViewer" to="." method="_on_source_viewer_glyph_selected"]
 [connection signal="rect_selected" from="SourceExplorer/AspectRatioContainer/Viewport/SubViewport/SourceViewer" to="." method="_on_source_viewer_rect_selected"]
+[connection signal="pressed" from="SourceExplorer/VBoxContainer/HBoxContainer/Prev" to="." method="_on_prev_pressed"]
+[connection signal="pressed" from="SourceExplorer/VBoxContainer/HBoxContainer/Next" to="." method="_on_next_pressed"]
+[connection signal="text_submitted" from="SourceExplorer/VBoxContainer/HBoxContainer/Selected" to="." method="_on_selected_text_submitted"]

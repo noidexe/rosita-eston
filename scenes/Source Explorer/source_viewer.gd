@@ -14,9 +14,9 @@ var center : Vector2 = Vector2.ZERO
 
 @export var font : Font
 
-signal rect_selected(rect : Rect2)
+signal rect_selected(rect : Rect2, id : bool)
 signal glyph_selected(id : int)
-signal glyph_removed(id : int)
+signal glyph_location_removed(id : int, rect: Rect2)
 
 func get_aspect_ratio():
 	return $source.get_rect().size.aspect()
@@ -30,6 +30,8 @@ func set_source( p_source : Database.Source ):
 	_update_display()
 
 func _input(event: InputEvent) -> void:
+	if not source:
+		return
 	var texture_pos = $source.to_local(get_global_mouse_position())
 	if event.is_pressed() and event is InputEventMouseButton:
 		if (event as InputEventMouseButton).button_index == MOUSE_BUTTON_WHEEL_DOWN:
@@ -53,8 +55,9 @@ func _input(event: InputEvent) -> void:
 				var rect := Rect2()
 				rect.position = drag_start_pos
 				rect.end = texture_pos
+				var repeat_id := Input.is_physical_key_pressed(KEY_CTRL)
 				if rect.has_area():
-					rect_selected.emit(rect)
+					rect_selected.emit(rect, selected if repeat_id else 0)
 				_update_display()
 		if event is InputEventMouseMotion:
 			if dragging:
@@ -65,7 +68,7 @@ func _input(event: InputEvent) -> void:
 		if event is InputEventMouseButton and event.is_pressed() and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
 			for rect in source.rects:
 				if rect.has_point(texture_pos):
-					glyph_removed.emit(source.rects[rect])
+					glyph_location_removed.emit(source.rects[rect], rect)
 					_update_display()
 					break
 		
@@ -73,13 +76,16 @@ func _input(event: InputEvent) -> void:
 		if event is InputEventMouseButton and event.is_pressed() and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
 			for rect in source.rects:
 				if rect.has_point(texture_pos):
-					selected = source.rects[rect]
-					glyph_selected.emit(selected)
-					_update_display()
+					select(source.rects[rect])
 					break
 
 func _update_display():
 	queue_redraw()
+
+func select(id: int):
+	selected = id
+	glyph_selected.emit(selected)
+	_update_display()
 
 func _draw() -> void:
 	if source:
