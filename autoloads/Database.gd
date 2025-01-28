@@ -236,12 +236,25 @@ func db_load() -> Error:
 
 ## Saves the database
 func db_save() -> Error:
+	var err := ERR_BUG
+	## Check for existing lock
+	var lockfile : FileAccess
+	var lockfile_path = DEFAULT_DB_PATH.path_join("db.lock")
+	if FileAccess.file_exists(lockfile_path):
+		return ERR_FILE_ALREADY_IN_USE
+	else:
+		lockfile = FileAccess.open(lockfile_path, FileAccess.WRITE)
+		err = FileAccess.get_open_error()
+		if err != OK:
+			return err
+		lockfile.flush()
+		lockfile.close()
+		
 	save_started.emit()
 	await get_tree().process_frame
 	
 	var start_time := Time.get_ticks_msec()
 	var db_path : String = DEFAULT_DB_PATH.path_join(GLYPH_DB_FILENAME)
-	var err := ERR_BUG
 	if FileAccess.file_exists(db_path):
 		var ext = db_path.get_extension()
 		var basename = db_path.get_basename()
@@ -250,6 +263,8 @@ func db_save() -> Error:
 	err = FileAccess.get_open_error()
 	if err == OK:
 		file.store_string(glyph_db.serialize())
+	
+	err = DirAccess.remove_absolute(lockfile_path)
 	print("Saved in %ss" % (0.001 * (Time.get_ticks_msec() - start_time) ))
 	save_complete.emit()
 	return err
@@ -675,7 +690,7 @@ func _ready() -> void:
 	timer.wait_time = 60
 	timer.autostart = true
 	timer.one_shot = false
-	timer.timeout.connect(db_save)
+	timer.timeout.connect(func(): print(await db_save()))
 	add_child(timer)
 
 func _add_random_glyph():
