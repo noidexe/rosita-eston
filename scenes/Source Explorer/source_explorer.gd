@@ -25,6 +25,8 @@ func _ready() -> void:
 		button.custom_minimum_size.x = 200
 		%Thumbnails.add_child(button)
 		button.pressed.connect(_on_thumb_selected.bind(source.path))
+	if not sources.is_empty():
+		_on_thumb_selected(sources.front().path)
 
 
 func _on_thumb_selected( path: String ):

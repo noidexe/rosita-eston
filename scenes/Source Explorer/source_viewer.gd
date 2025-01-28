@@ -31,6 +31,7 @@ func set_source( p_source : Database.Source ):
 	_update_display()
 
 func _input(event: InputEvent) -> void:
+	
 	if not source:
 		return
 	var texture_pos = $source.to_local(get_global_mouse_position())
@@ -53,6 +54,7 @@ func _input(event: InputEvent) -> void:
 		$camera.position -= motion_event.relative / $camera.zoom
 	
 	if mode == Mode.CREATE:
+		Input.set_default_cursor_shape(Input.CURSOR_CROSS)
 		if event is InputEventMouseButton and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
 			if event.is_pressed():
 				drag_start_pos = texture_pos
@@ -73,6 +75,7 @@ func _input(event: InputEvent) -> void:
 				_update_display()
 
 	elif mode == Mode.REMOVE:
+		Input.set_default_cursor_shape(Input.CURSOR_FORBIDDEN)
 		if event is InputEventMouseButton and event.is_pressed() and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
 			for rect in source.rects:
 				if rect.has_point(texture_pos):
@@ -81,6 +84,7 @@ func _input(event: InputEvent) -> void:
 					break
 		
 	elif mode == Mode.SELECT:
+		Input.set_default_cursor_shape(Input.CURSOR_ARROW)
 		if event is InputEventMouseButton and event.is_pressed() and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
 			for rect in source.rects:
 				if rect.has_point(texture_pos):
@@ -100,23 +104,23 @@ func _draw() -> void:
 		for rect in source.rects.keys():
 			var _rect = rect
 			var id = source.rects[rect]
-			_rect.position += Vector2i(2,2)
-			draw_rect(_rect, Color.BLACK, false, 2)
-			_rect.position -= Vector2i(2,2)
-			draw_rect(_rect, Color.RED if id == selected else Color.WHITE, false, 2)
-			var text_pos = _rect.position + Vector2i(10,25)
-			draw_string(font, text_pos, str(id),HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color.BLACK )
+			_rect.position += Vector2i(1,1)
+			draw_rect(_rect, Color.BLACK, false, 1)
+			_rect.position -= Vector2i(1,1)
+			draw_rect(_rect, Color.RED if id == selected else Color.WHITE, false, 1)
+			var text_pos = _rect.position + Vector2i(4,12)
+			draw_string(font, text_pos, str(id),HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color.BLACK )
 			text_pos += Vector2i(-1,-1)
-			draw_string(font, text_pos, str(id),HORIZONTAL_ALIGNMENT_LEFT, -1, 20 )
+			draw_string(font, text_pos, str(id),HORIZONTAL_ALIGNMENT_LEFT, -1, 10 )
 			var glyph = Database.glyph_get(id)
 			if not glyph:
 				continue
 			var definition = glyph.definitions.front() if not glyph.definitions.is_empty() else null
 			if not definition:
 				continue
-			text_pos += Vector2i(0, -30)
-			draw_string(font, text_pos, str(glyph.definitions.front()),HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color.BLACK )
+			text_pos += Vector2i(0, -13)
+			draw_string(font, text_pos, str(glyph.definitions.front()),HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color.BLACK )
 			text_pos += Vector2i(-1, -1)
-			draw_string(font, text_pos, str(glyph.definitions.front()),HORIZONTAL_ALIGNMENT_LEFT, -1, 20 )
+			draw_string(font, text_pos, str(glyph.definitions.front()),HORIZONTAL_ALIGNMENT_LEFT, -1, 10 )
 	if dragging:
-		draw_rect( Rect2(drag_start_pos, drag_end_pos - drag_start_pos), Color.YELLOW, false, 3 )
+		draw_rect( Rect2(drag_start_pos, drag_end_pos - drag_start_pos), Color.YELLOW, false, 1 )
