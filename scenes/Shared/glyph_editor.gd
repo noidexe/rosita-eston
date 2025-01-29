@@ -9,7 +9,7 @@ var glyph : Database.Glyph:
 		_update_display()
 
 func is_editing_definition() -> bool:
-	return %Definitions.get_children().any(func(child : DefinitionEditor): return child.dirty )
+	return %Definitions.get_children().any(func(child : DefinitionEditor): return child.get_node("%Text").has_focus() )
 
 func _add_definition(index: int, text : String):
 	var definition_editor : DefinitionEditor = preload("uid://du8pnwobbthhw").instantiate()
@@ -35,7 +35,7 @@ func _update_display():
 		queue_free()
 		return
 
-	%Id.text = str(glyph.id)
+	%Id.text = "Id: %s, Locs: %s" % [glyph.id, glyph.locations.size()]
 	for i : int in glyph.definitions.size():
 		_add_definition(i, glyph.definitions[i])
 	if glyph.orphan:
