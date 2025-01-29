@@ -210,6 +210,7 @@ func db_create() -> Error:
 
 ## Loads the database
 func db_load() -> Error:
+	print("Loading...")
 	var start_time := Time.get_ticks_msec()
 	var db_path : String = DEFAULT_DB_PATH.path_join(GLYPH_DB_FILENAME)
 	var sources_path : String = DEFAULT_DB_PATH.path_join(SOURCE_DB_FOLDER)
@@ -222,6 +223,7 @@ func db_load() -> Error:
 	
 	var file = FileAccess.open(db_path, FileAccess.READ)
 	err = FileAccess.get_open_error()
+	assert(err == OK)
 	if not err == OK:
 		return err
 	
@@ -236,6 +238,7 @@ func db_load() -> Error:
 
 ## Saves the database
 func db_save() -> Error:
+	print("Saving...")
 	var err := ERR_BUG
 	## Check for existing lock
 	var lockfile : FileAccess
@@ -245,6 +248,7 @@ func db_save() -> Error:
 	else:
 		lockfile = FileAccess.open(lockfile_path, FileAccess.WRITE)
 		err = FileAccess.get_open_error()
+		assert(err == OK)
 		if err != OK:
 			return err
 		lockfile.flush()
@@ -258,15 +262,20 @@ func db_save() -> Error:
 	if FileAccess.file_exists(db_path):
 		var ext = db_path.get_extension()
 		var basename = db_path.get_basename()
-		DirAccess.copy_absolute(db_path, basename + "[backup]." + ext)
+		var copy_error := DirAccess.copy_absolute(db_path, basename + "[backup]." + ext)
+		assert(copy_error == OK)
 	var file = FileAccess.open(db_path, FileAccess.WRITE)
 	err = FileAccess.get_open_error()
+	assert(err == OK)
 	if err == OK:
 		file.store_string(glyph_db.serialize())
+		file.flush()
+		file.close()
 	
 	err = DirAccess.remove_absolute(lockfile_path)
 	print("Saved in %ss" % (0.001 * (Time.get_ticks_msec() - start_time) ))
 	save_complete.emit()
+	assert(err == OK)
 	return err
 #endregion
 
