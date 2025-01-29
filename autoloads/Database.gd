@@ -210,8 +210,7 @@ func db_create() -> Error:
 
 ## Loads the database
 func db_load() -> Error:
-	print("Loading...")
-	var start_time := Time.get_ticks_msec()
+	var cronometer = Cronometer.new("Loading db..")
 	var db_path : String = DEFAULT_DB_PATH.path_join(GLYPH_DB_FILENAME)
 	var sources_path : String = DEFAULT_DB_PATH.path_join(SOURCE_DB_FOLDER)
 	var err := ERR_BUG
@@ -233,12 +232,12 @@ func db_load() -> Error:
 	sources_db = SourcesDB.new(glyph_db)
 	sources_db.add_sources_from_paths(DirAccess.get_files_at(sources_path))
 	err = OK
-	print("Loaded in %ss" % (0.001 * (Time.get_ticks_msec()-start_time )))
+	cronometer.total("DB Loaded")
 	return err
 
 ## Saves the database
 func db_save() -> Error:
-	print("Saving...")
+	var cronometer = Cronometer.new("Saving DB")
 	var err := ERR_BUG
 	## Check for existing lock
 	var lockfile : FileAccess
@@ -257,7 +256,7 @@ func db_save() -> Error:
 	save_started.emit()
 	await get_tree().process_frame
 	
-	var start_time := Time.get_ticks_msec()
+	
 	var db_path : String = DEFAULT_DB_PATH.path_join(GLYPH_DB_FILENAME)
 	if FileAccess.file_exists(db_path):
 		var ext = db_path.get_extension()
@@ -273,7 +272,7 @@ func db_save() -> Error:
 		file.close()
 	
 	err = DirAccess.remove_absolute(lockfile_path)
-	print("Saved in %ss" % (0.001 * (Time.get_ticks_msec() - start_time) ))
+	cronometer.total("DB Saved.")
 	save_complete.emit()
 	assert(err == OK)
 	return err
@@ -282,6 +281,7 @@ func db_save() -> Error:
 #region Search
 ## Returns an array of glyphs
 func glossary_search(query : GlossarySearchQuery) -> Array[Glyph]:
+	var cronometer = Cronometer.new("Starting query")
 	var result : Array[Glyph] = []
 	var ids : Array[int] = []
 	if query.string.is_empty():
@@ -290,17 +290,22 @@ func glossary_search(query : GlossarySearchQuery) -> Array[Glyph]:
 		query.string = query.string.to_lower()
 		if query.perfect_match:
 			ids += definition_db.get_glyph_ids(query.string)
+		cronometer.lap("Found pefect matches")
 		if query.match_all_words:
 			ids += definition_db.get_glyph_ids_wordset(RositaDB.extract_words(query.string))
+		cronometer.lap("Found 'all words' matches")
 		if query.match_any_words:
 			ids += word_db.get_glyph_ids_from_sentece(query.string)
+		cronometer.lap("Found 'any word' matches")
 		result = glyph_db.get_from_ids(ids)
-	
+	cronometer.total("Query results obtained. Sorting..")
+	cronometer.lap()
 	if query.sort_mode == GlossarySearchQuery.SortMode.ID:
 		result.sort_custom(func(a: Glyph, b: Glyph): return a.id < b.id )
 	elif query.sort_mode == GlossarySearchQuery.SortMode.FREQUENCY:
 		result.sort_custom(func(a: Glyph, b: Glyph): return a.locations.size() > b.locations.size() )
-
+	cronometer.lap("Sorted.")
+	cronometer.total("Query finished.")
 	return result
 #endregion
 
@@ -730,6 +735,7 @@ class TextureCache extends RefCounted:
 		if thumbnails.size() >= MAX_THUMBNAIS:
 			thumbnails.erase(thumbnails.keys().front())
 		thumbnails[path] = texture
+
 #endregion
 
 #region Member Props

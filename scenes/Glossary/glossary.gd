@@ -4,6 +4,8 @@ class_name Glossary
 signal glyph_selected(glyph: Database.Glyph)
 signal source_selected(path: String)
 
+var glyph_cache : Dictionary [Database.Glyph, GlyphEntry] = {}
+
 func _ready() -> void:
 	for key in Database.GlossarySearchQuery.SortMode.keys():
 		%Sort.add_item(key)
@@ -17,23 +19,32 @@ func _on_query_text_submitted(new_text: String) -> void:
 	query.match_any_words = %AnyWords.button_pressed
 	query.sort_mode = %Sort.selected as Database.GlossarySearchQuery.SortMode
 	var result := Database.glossary_search(query)
+	var cronometer = Cronometer.new("Displaying search results..")
 	clear()
+	cronometer.lap("Search results view cleared.")
 	for glyph in result:
 		add_entry(glyph)
+	cronometer.lap("Search reults view updated")
+	cronometer.total("Total time:")
 
 func clear():
 	for child in %SearchResults.get_children():
 		%SearchResults.remove_child(child)
-		child.queue_free()
+		#child.queue_free()
 	for child in %Details.get_children():
 		%Details.remove_child(child)
 		child.queue_free()
 
 func add_entry(glyph : Database.Glyph):
-	var glyph_entry : GlyphEntry = preload("uid://cwp60k603jkko").instantiate()
+	var glyph_entry : GlyphEntry
+	if glyph_cache.has(glyph):
+		glyph_entry = glyph_cache[glyph]
+	else:
+		glyph_entry = preload("uid://cwp60k603jkko").instantiate()
+		glyph_entry.glyph = glyph
+		glyph_entry.selected.connect(edit_entry.bind(glyph))
+		glyph_cache[glyph] = glyph_entry
 	%SearchResults.add_child(glyph_entry)
-	glyph_entry.glyph = glyph
-	glyph_entry.selected.connect(edit_entry.bind(glyph))
 
 func edit_entry(glyph : Database.Glyph):
 	for child in %Details.get_children():
