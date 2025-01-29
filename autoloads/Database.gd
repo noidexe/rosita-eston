@@ -653,7 +653,7 @@ class SourcesDB extends RefCounted:
 	
 	func list_sorted() -> Array[Source]:
 		var ret := sources.values()
-		ret.sort_custom(func(a : Source, b: Source): return a.size < b.size )
+		ret.sort_custom(func(a : Source, b: Source): return a.path.filenocasecmp_to(b.path) == -1 )
 		return ret
 	
 	func list_empty() -> Array[Source]:
