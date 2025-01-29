@@ -17,7 +17,7 @@ func _ready() -> void:
 			%Create.set_pressed_no_signal(true)
 		SourceViewer.Mode.REMOVE:
 			%Create.set_pressed_no_signal(true)
-	var sources := Database.sources_db.list()
+	var sources := Database.sources_db.list_sorted()
 	for source in sources:
 		var texture = Database.get_thumbnail(source)
 		var button := TextureButton.new()
@@ -65,10 +65,13 @@ func _on_erase_pressed() -> void:
 
 
 func _on_source_viewer_rect_selected(rect: Rect2, id : int) -> void:
-	var glyph : Database.Glyph = Database.glyph_get(id) if id != 0 else Database.glyph_add()
+	var glyph : Database.Glyph = Database.glyph_get(id)
+	var should_create = glyph == null or id == 0
+	if should_create:
+		glyph = Database.glyph_add()
 	glyph.locations_add(current_path, rect)
 	viewer.select(glyph.id)
-	if id == 0:
+	if should_create:
 		(%GlyphEditorContainer.get_child(0) as GlyphEditor)._on_add_definition_pressed()
 
 
