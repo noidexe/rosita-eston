@@ -73,7 +73,7 @@ func _input(event: InputEvent) -> void:
 				var rect := Rect2()
 				rect.position = drag_start_pos
 				rect.end = texture_pos
-				var repeat_id := Input.is_physical_key_pressed(KEY_CTRL)
+				var repeat_id := not Input.is_physical_key_pressed(KEY_CTRL)
 				if rect.has_area():
 					rect_selected.emit(rect, selected if repeat_id else 0)
 				_update_display()
