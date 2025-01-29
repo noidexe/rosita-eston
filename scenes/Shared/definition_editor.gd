@@ -8,6 +8,9 @@ signal remove_requested()
 func set_text(text : String):
 	$Text.text = text
 
+func focus():
+	$Text.grab_focus()
+
 func _on_remove_pressed() -> void:
 	remove_requested.emit()
 

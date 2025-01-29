@@ -2,8 +2,12 @@ extends VBoxContainer
 class_name SourceExplorer
 
 var current_path := ""
+var current_glyph_editor : GlyphEditor = null
+
 
 @export var viewer : SourceViewer
+
+
 
 func _ready() -> void:
 	match viewer.mode:
@@ -28,6 +32,18 @@ func _ready() -> void:
 	if not sources.is_empty():
 		_on_thumb_selected(sources.front().path)
 
+func _input(event: InputEvent) -> void:
+	if %Selected.has_focus() or (current_glyph_editor and current_glyph_editor.is_editing_definition()):
+		return
+	if event.is_action_pressed("create_tool"):
+		_on_create_pressed()
+	elif event.is_action_pressed("select_tool"):
+		_on_select_pressed()
+	elif event.is_action_pressed("erase_tool"):
+		_on_erase_pressed()
+	elif event.is_action_released("lookup_tool"):
+		%Selected.grab_focus()
+		%Selected.text = ""
 
 func _on_thumb_selected( path: String ):
 	viewer.set_source(Database.sources_db.sources.get(path))
@@ -36,12 +52,15 @@ func _on_thumb_selected( path: String ):
 
 
 func _on_create_pressed() -> void:
+	%Create.button_pressed = true
 	viewer.mode = SourceViewer.Mode.CREATE
 
 func _on_select_pressed() -> void:
+	%Select.button_pressed = true
 	viewer.mode = SourceViewer.Mode.SELECT
 
 func _on_erase_pressed() -> void:
+	%Erase.button_pressed = true
 	viewer.mode = SourceViewer.Mode.REMOVE
 
 
@@ -49,15 +68,19 @@ func _on_source_viewer_rect_selected(rect: Rect2, id : int) -> void:
 	var glyph : Database.Glyph = Database.glyph_get(id) if id != 0 else Database.glyph_add()
 	glyph.locations_add(current_path, rect)
 	viewer.select(glyph.id)
+	if id == 0:
+		(%GlyphEditorContainer.get_child(0) as GlyphEditor)._on_add_definition_pressed()
 
 
 func _on_source_viewer_glyph_selected(id: int) -> void:
 	for child in %GlyphEditorContainer.get_children():
+		current_glyph_editor = null
 		%GlyphEditorContainer.remove_child(child)
 		child.queue_free()
 	var glyph = Database.glyph_get(id)
 	var glyph_editor : GlyphEditor = preload("uid://bw5ts2cyuaquo").instantiate()
 	%GlyphEditorContainer.add_child(glyph_editor)
+	current_glyph_editor = glyph_editor
 	glyph_editor.glyph = glyph
 
 
@@ -91,6 +114,7 @@ func _on_selected_text_submitted(new_text: String) -> void:
 			id = result.front().id
 	viewer.select(id)
 	%Selected.text = str(id)
+	%Selected.release_focus()
 
 func _on_glyph_selected( glyph : Database.Glyph):
 	if glyph == null:

@@ -8,6 +8,9 @@ var glyph : Database.Glyph:
 			glyph.changed.connect(_update_display)
 		_update_display()
 
+func is_editing_definition() -> bool:
+	return %Definitions.get_children().any(func(child : DefinitionEditor): return child.dirty )
+
 func _add_definition(index: int, text : String):
 	var definition_editor : DefinitionEditor = preload("uid://du8pnwobbthhw").instantiate()
 	definition_editor.set_text(text)
@@ -45,6 +48,7 @@ func _on_add_definition_pressed() -> void:
 	if glyph == null:
 		return
 	glyph.definition_add("")
+	%Definitions.get_children().back().focus()
 
 func _on_definition_changed(new_def, index):
 	if glyph == null:
