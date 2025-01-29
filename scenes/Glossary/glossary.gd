@@ -23,8 +23,10 @@ func _on_query_text_submitted(new_text: String) -> void:
 
 func clear():
 	for child in %SearchResults.get_children():
+		%SearchResults.remove_child(child)
 		child.queue_free()
 	for child in %Details.get_children():
+		%Details.remove_child(child)
 		child.queue_free()
 
 func add_entry(glyph : Database.Glyph):
@@ -35,12 +37,14 @@ func add_entry(glyph : Database.Glyph):
 
 func edit_entry(glyph : Database.Glyph):
 	for child in %Details.get_children():
+		%Details.remove_child(child)
 		child.queue_free()
 	var glyph_editor : GlyphEditor = preload("uid://bw5ts2cyuaquo").instantiate()
 	%Details.add_child(glyph_editor)
 	glyph_editor.glyph = glyph
 	glyph_selected.emit(glyph)
 	for child in %Sources.get_children():
+		%Sources.remove_child(child)
 		child.queue_free()
 	var used_paths := []
 	for location in glyph.locations:

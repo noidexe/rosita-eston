@@ -22,6 +22,7 @@ func _update_display():
 		await ready
 	
 	for child : Node in %Definitions.get_children():
+		%Definitions.remove_child(child)
 		child.queue_free()
 	if glyph == null:
 		%Id.text = str(0)

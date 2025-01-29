@@ -53,6 +53,7 @@ func _on_source_viewer_rect_selected(rect: Rect2, id : int) -> void:
 
 func _on_source_viewer_glyph_selected(id: int) -> void:
 	for child in %GlyphEditorContainer.get_children():
+		%GlyphEditorContainer.remove_child(child)
 		child.queue_free()
 	var glyph = Database.glyph_get(id)
 	var glyph_editor : GlyphEditor = preload("uid://bw5ts2cyuaquo").instantiate()
