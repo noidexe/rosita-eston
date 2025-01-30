@@ -17,6 +17,12 @@ func _ready() -> void:
 			%Create.set_pressed_no_signal(true)
 		SourceViewer.Mode.REMOVE:
 			%Create.set_pressed_no_signal(true)
+	_reload_sources()
+
+func _reload_sources():
+	for child in %Thumbnails.get_children():
+		%Thumbnails.remove_child(child)
+		child.queue_free()
 	var sources := Database.sources_db.list_sorted()
 	for source in sources:
 		var texture = Database.get_thumbnail(source)
@@ -49,6 +55,7 @@ func _on_thumb_selected( path: String ):
 	viewer.set_source(Database.sources_db.sources.get(path))
 	%AspectRatioContainer.ratio = viewer.get_aspect_ratio()
 	current_path = path
+	%SourceName.text = current_path.get_basename()
 
 
 func _on_create_pressed() -> void:
@@ -123,3 +130,10 @@ func _on_glyph_selected( glyph : Database.Glyph):
 	if glyph == null:
 		return
 	viewer.select(glyph.id)
+
+
+func _on_rename_pressed() -> void:
+	var new_path : String = %SourceName.text + "." + current_path.get_extension()
+	Database.rename_source(current_path, %SourceName.text + "." + current_path.get_extension() )
+	_reload_sources()
+	_on_thumb_selected(new_path)

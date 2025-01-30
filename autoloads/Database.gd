@@ -334,6 +334,41 @@ func glyph_count() -> int:
 	return glyph_db.size()
 #endregion
 
+#region Source Handling
+func rename_source( from: String, to: String ) -> Error:
+	var err = ERR_BUG
+	# Rename the file
+	var base_path = DEFAULT_DB_PATH.path_join(SOURCE_DB_FOLDER)
+	var from_full_path = base_path.path_join(from)
+	var to_full_path = base_path.path_join(to)
+	if FileAccess.file_exists(to_full_path):
+		return ERR_FILE_ALREADY_IN_USE
+	
+	err = DirAccess.rename_absolute(from_full_path, to_full_path)
+	if err != OK:
+		return err
+	
+	var source : Source
+	if !sources_db.sources.has(from):
+		return OK
+	var glyphs : Array[Glyph] = glyph_db.get_from_ids(sources_db.sources[from].get_glyph_ids())
+	for glyph in glyphs:
+		if glyph == null:
+			continue
+		for i in glyph.locations.size():
+			var l : Location = glyph.locations[i]
+			if l.path == from:
+				var rect = l.rect
+				glyph.locations_remove(i)
+				glyph.locations_add(to, rect)
+	err = OK
+	sources_db.remove_source(from)
+	sources_db.add_source(to)
+	texture_cache.purge()
+	return err
+
+#endregion
+
 #region Texture retrieval
 func glyph_get_texture(glyph: Glyph) -> Texture2D:
 	if glyph == null or glyph.locations.is_empty():
@@ -624,6 +659,9 @@ class Source extends RefCounted:
 	
 	func remove_rect( rect : Rect2i):
 		rects.erase(rect)
+	
+	func get_glyph_ids() -> Array[int]:
+		return rects.values()
 
 class SourcesDB extends RefCounted:
 	var sources : Dictionary[String,Source] = {}
@@ -662,6 +700,9 @@ class SourcesDB extends RefCounted:
 		for path in paths:
 			add_source(path)
 	
+	func get_paths() -> Array[String]:
+		return sources.keys()
+	
 	func list() -> Array[Source]:
 		return sources.values()
 	
@@ -682,11 +723,25 @@ class TextureCache extends RefCounted:
 	var base_path : String = ""
 	var textures : Dictionary[String,Texture2D] = {}
 	var thumbnails : Dictionary[String, Texture2D] = {}
+	var locations : Dictionary[Location, Texture2D] = {}
 	
 	func _init(p_base_path : String) -> void:
 		assert(p_base_path.is_absolute_path())
 		base_path = p_base_path
 		textures[base_path] = Texture2D.new()
+	
+	func purge() -> bool:
+		var ret = false
+		var sources := Database.sources_db.sources
+		for key in textures.keys():
+			if not sources.has(key):
+				ret = true
+				textures.erase(key)
+		for key in thumbnails.keys():
+			if not sources.has(key):
+				ret = true
+				thumbnails.erase(key)
+		return ret
 	
 	func get_texture( path: String ) -> Texture2D:
 		_load_texture_if_needed(path)

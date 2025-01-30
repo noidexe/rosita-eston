@@ -74,7 +74,7 @@ stretch = true
 [node name="SubViewport" type="SubViewport" parent="SourceExplorer/AspectRatioContainer/Viewport"]
 disable_3d = true
 handle_input_locally = false
-size = Vector2i(2, 2)
+size = Vector2i(509, 509)
 size_2d_override_stretch = true
 render_target_update_mode = 4
 
@@ -110,6 +110,21 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
+[node name="SourceTools" type="HBoxContainer" parent="."]
+layout_mode = 2
+alignment = 1
+
+[node name="SourceName" type="LineEdit" parent="SourceTools"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Rename" type="Button" parent="SourceTools"]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Rename"
+
 [connection signal="pressed" from="SourceExplorer/Toolbar/Select" to="." method="_on_select_pressed"]
 [connection signal="pressed" from="SourceExplorer/Toolbar/Create" to="." method="_on_create_pressed"]
 [connection signal="pressed" from="SourceExplorer/Toolbar/Erase" to="." method="_on_erase_pressed"]
@@ -119,3 +134,4 @@ horizontal_scroll_mode = 0
 [connection signal="pressed" from="SourceExplorer/VBoxContainer/HBoxContainer/Prev" to="." method="_on_prev_pressed"]
 [connection signal="pressed" from="SourceExplorer/VBoxContainer/HBoxContainer/Next" to="." method="_on_next_pressed"]
 [connection signal="text_submitted" from="SourceExplorer/VBoxContainer/HBoxContainer/Selected" to="." method="_on_selected_text_submitted"]
+[connection signal="pressed" from="SourceTools/Rename" to="." method="_on_rename_pressed"]
