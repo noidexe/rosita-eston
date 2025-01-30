@@ -123,10 +123,18 @@ func _on_glyph_selected( glyph : Database.Glyph):
 		return
 	viewer.select(glyph.id)
 
+func _on_source_name_text_submitted(new_text: String) -> void:
+	_on_rename_pressed()
 
 func _on_rename_pressed() -> void:
 	var new_path : String = %SourceName.text + "." + current_path.get_extension()
-	Database.rename_source(current_path, %SourceName.text + "." + current_path.get_extension() )
+	if not new_path.is_valid_filename():
+		%SourceName.text = current_path.get_basename()
+		return
+	var err = Database.rename_source(current_path, %SourceName.text + "." + current_path.get_extension() )
+	if err != OK:
+		%SourceName.text = current_path.get_basename()
+		return
 	_reload_sources()
 	_on_thumb_selected(new_path)
 

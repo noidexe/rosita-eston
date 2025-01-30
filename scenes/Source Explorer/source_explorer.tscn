@@ -160,4 +160,5 @@ text = "Rename"
 [connection signal="text_changed" from="SourceExplorer/VBoxContainer/HBoxContainer/Selected" to="." method="_on_selected_text_changed"]
 [connection signal="text_submitted" from="SourceExplorer/VBoxContainer/HBoxContainer/Selected" to="." method="_on_selected_text_submitted"]
 [connection signal="text_changed" from="SourceTools/SourceName" to="." method="_on_source_name_text_changed"]
+[connection signal="text_submitted" from="SourceTools/SourceName" to="." method="_on_source_name_text_submitted"]
 [connection signal="pressed" from="SourceTools/Rename" to="." method="_on_rename_pressed"]
