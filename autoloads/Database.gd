@@ -86,7 +86,7 @@ class Glyph extends RefCounted:
 		if orphan and definitions.is_empty():
 			destroy()
 	
-	func locations_remove_rect ( rect : Rect2i ):
+	func locations_remove_rect ( path: String, rect : Rect2i ):
 		for i in locations.size():
 			if locations[i].rect == rect:
 				locations_remove(i)

@@ -89,7 +89,7 @@ func _on_source_viewer_glyph_selected(id: int) -> void:
 
 func _on_source_viewer_glyph_location_removed(id: int, rect: Rect2) -> void:
 	var glyph = Database.glyph_get(id)
-	glyph.locations_remove_rect(rect)
+	glyph.locations_remove_rect(current_path, rect)
 
 
 func _on_next_pressed() -> void:
