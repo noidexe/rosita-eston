@@ -57,6 +57,11 @@ text = "Sort:"
 unique_name_in_owner = true
 layout_mode = 2
 
+[node name="SortInverted" type="CheckBox" parent="SearchBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Invert"
+
 [node name="Content" type="HBoxContainer" parent="."]
 unique_name_in_owner = true
 layout_mode = 2
@@ -104,3 +109,4 @@ size_flags_vertical = 3
 [connection signal="toggled" from="SearchBox/AllWords" to="." method="_on_all_words_toggled"]
 [connection signal="toggled" from="SearchBox/AnyWords" to="." method="_on_any_words_toggled"]
 [connection signal="item_selected" from="SearchBox/Sort" to="." method="_on_sort_item_selected"]
+[connection signal="toggled" from="SearchBox/SortInverted" to="." method="_on_sort_inverted_toggled"]

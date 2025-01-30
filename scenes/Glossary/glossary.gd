@@ -19,6 +19,7 @@ func _on_query_text_submitted(new_text: String) -> void:
 	query.match_all_words = %AllWords.button_pressed
 	query.match_any_words = %AnyWords.button_pressed
 	query.sort_mode = %Sort.selected as Database.GlossarySearchQuery.SortMode
+	query.sort_inverted = %SortInverted.button_pressed
 	var result := Database.glossary_search(query)
 	var cronometer = Cronometer.new("Displaying search results..")
 	clear()
@@ -70,15 +71,11 @@ func edit_entry(glyph : Database.Glyph):
 
 func _on_perfect_toggled(_toggled_on: bool) -> void:
 	_on_query_text_submitted(%Query.text)
-
-
 func _on_all_words_toggled(_toggled_on: bool) -> void:
 	_on_query_text_submitted(%Query.text)
-
-
 func _on_any_words_toggled(_toggled_on: bool) -> void:
 	_on_query_text_submitted(%Query.text)
-
-
 func _on_sort_item_selected(_index: int) -> void:
+	_on_query_text_submitted(%Query.text)
+func _on_sort_inverted_toggled(toggled_on: bool) -> void:
 	_on_query_text_submitted(%Query.text)

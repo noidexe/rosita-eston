@@ -44,6 +44,7 @@ class GlossarySearchQuery extends RefCounted:
 	var match_all_words : bool
 	var match_any_words : bool
 	var sort_mode := SortMode.NONE
+	var sort_inverted := false
 
 
 ## Data Structure to handle Glyphs
@@ -304,6 +305,8 @@ func glossary_search(query : GlossarySearchQuery) -> Array[Glyph]:
 		result.sort_custom(func(a: Glyph, b: Glyph): return a.id < b.id )
 	elif query.sort_mode == GlossarySearchQuery.SortMode.FREQUENCY:
 		result.sort_custom(func(a: Glyph, b: Glyph): return a.locations.size() > b.locations.size() )
+	if query.sort_inverted:
+		result.reverse()
 	cronometer.lap("Sorted.")
 	cronometer.total("Query finished.")
 	return result
