@@ -10,6 +10,7 @@ func _ready() -> void:
 	for key in Database.GlossarySearchQuery.SortMode.keys():
 		%Sort.add_item(key)
 	%Sort.selected = 0
+	_on_query_text_submitted("")
 
 func _on_query_text_submitted(new_text: String) -> void:
 	var query := Database.GlossarySearchQuery.new()
