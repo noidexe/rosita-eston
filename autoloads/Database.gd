@@ -351,7 +351,7 @@ func get_texture(key : Variant) -> Texture2D:
 	elif key is String:
 		return texture_cache.get_texture(key)
 	else:
-		return Texture2D.new()
+		return preload("res://textures/texture_not_found.png")
 
 
 # Accepts a Source, a Location or a path
