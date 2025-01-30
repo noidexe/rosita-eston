@@ -1,0 +1,47 @@
+[gd_scene load_steps=4 format=3 uid="uid://cqw6rwa587b35"]
+
+[ext_resource type="Script" uid="uid://bddgyttchbxxg" path="res://scenes/combo/combo.gd" id="1_5xjmg"]
+[ext_resource type="PackedScene" uid="uid://bm4obkucf6pvo" path="res://scenes/Glossary/glossary.tscn" id="2_qgipa"]
+[ext_resource type="PackedScene" uid="uid://cm7nt1r5rwjrc" path="res://scenes/Source Explorer/source_explorer.tscn" id="3_sku1u"]
+
+[node name="Combo" type="HBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_5xjmg")
+
+[node name="Glossary" parent="." instance=ExtResource("2_qgipa")]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Perfect" parent="Glossary/SearchBox" index="2"]
+visible = false
+
+[node name="AllWords" parent="Glossary/SearchBox" index="3"]
+visible = false
+
+[node name="AnyWords" parent="Glossary/SearchBox" index="4"]
+visible = false
+
+[node name="Label" parent="Glossary/SearchBox" index="5"]
+visible = false
+
+[node name="Sort" parent="Glossary/SearchBox" index="6"]
+visible = false
+
+[node name="SortInverted" parent="Glossary/SearchBox" index="7"]
+button_pressed = true
+
+[node name="DetailsContainer" parent="Glossary/Content" index="1"]
+visible = false
+
+[node name="SourcesContainer" parent="Glossary/Content" index="2"]
+visible = false
+
+[node name="SourceExplorer" parent="." instance=ExtResource("3_sku1u")]
+layout_mode = 2
+size_flags_stretch_ratio = 3.6
+
+[editable path="Glossary"]

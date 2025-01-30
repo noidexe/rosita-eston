@@ -1,10 +1,11 @@
 extends Control
 
-enum Tools { GLOSSARY, SOURCES } 
+enum Tools { GLOSSARY, SOURCES, COMBO } 
 
 const tool_scenes : Dictionary[Tools, Dictionary] = {
 	Tools.GLOSSARY: { "name": "Glossary", "scene": preload("uid://bm4obkucf6pvo")},
 	Tools.SOURCES: { "name": "Source Explorer", "scene": preload("uid://cm7nt1r5rwjrc")},
+	Tools.COMBO: { "name": "Combo", "scene": preload("uid://cqw6rwa587b35") }
 }
 
 var tool_instances : Dictionary[Tools, Node] = {}
