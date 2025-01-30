@@ -1,9 +1,30 @@
-[gd_scene load_steps=4 format=3 uid="uid://cm7nt1r5rwjrc"]
+[gd_scene load_steps=10 format=3 uid="uid://cm7nt1r5rwjrc"]
 
 [ext_resource type="Script" uid="uid://bl163ir44oa38" path="res://scenes/Source Explorer/source_explorer.gd" id="1_v3bfa"]
 [ext_resource type="PackedScene" uid="uid://dtxgehkbutxbv" path="res://scenes/Source Explorer/source_viewer.tscn" id="2_bp0f1"]
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_76mm2"]
+
+[sub_resource type="InputEventAction" id="InputEventAction_bp0f1"]
+action = &"select_tool"
+pressed = true
+
+[sub_resource type="Shortcut" id="Shortcut_jgcey"]
+events = [SubResource("InputEventAction_bp0f1")]
+
+[sub_resource type="InputEventAction" id="InputEventAction_kyvc3"]
+action = &"create_tool"
+pressed = true
+
+[sub_resource type="Shortcut" id="Shortcut_hmlcq"]
+events = [SubResource("InputEventAction_kyvc3")]
+
+[sub_resource type="InputEventAction" id="InputEventAction_xavp4"]
+action = &"erase_tool"
+pressed = true
+
+[sub_resource type="Shortcut" id="Shortcut_1eaqv"]
+events = [SubResource("InputEventAction_xavp4")]
 
 [node name="SourceExplorer" type="VBoxContainer" node_paths=PackedStringArray("viewer")]
 anchors_preset = 15
@@ -41,6 +62,7 @@ layout_mode = 2
 size_flags_vertical = 3
 toggle_mode = true
 button_group = SubResource("ButtonGroup_76mm2")
+shortcut = SubResource("Shortcut_jgcey")
 text = "Select"
 
 [node name="Create" type="Button" parent="SourceExplorer/Toolbar"]
@@ -49,6 +71,7 @@ layout_mode = 2
 size_flags_vertical = 3
 toggle_mode = true
 button_group = SubResource("ButtonGroup_76mm2")
+shortcut = SubResource("Shortcut_hmlcq")
 text = "Create"
 
 [node name="Erase" type="Button" parent="SourceExplorer/Toolbar"]
@@ -57,6 +80,7 @@ layout_mode = 2
 size_flags_vertical = 3
 toggle_mode = true
 button_group = SubResource("ButtonGroup_76mm2")
+shortcut = SubResource("Shortcut_1eaqv")
 text = "Erase"
 
 [node name="AspectRatioContainer" type="AspectRatioContainer" parent="SourceExplorer"]
@@ -133,5 +157,7 @@ text = "Rename"
 [connection signal="rect_selected" from="SourceExplorer/AspectRatioContainer/Viewport/SubViewport/SourceViewer" to="." method="_on_source_viewer_rect_selected"]
 [connection signal="pressed" from="SourceExplorer/VBoxContainer/HBoxContainer/Prev" to="." method="_on_prev_pressed"]
 [connection signal="pressed" from="SourceExplorer/VBoxContainer/HBoxContainer/Next" to="." method="_on_next_pressed"]
+[connection signal="text_changed" from="SourceExplorer/VBoxContainer/HBoxContainer/Selected" to="." method="_on_selected_text_changed"]
 [connection signal="text_submitted" from="SourceExplorer/VBoxContainer/HBoxContainer/Selected" to="." method="_on_selected_text_submitted"]
+[connection signal="text_changed" from="SourceTools/SourceName" to="." method="_on_source_name_text_changed"]
 [connection signal="pressed" from="SourceTools/Rename" to="." method="_on_rename_pressed"]

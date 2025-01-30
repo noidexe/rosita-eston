@@ -38,16 +38,8 @@ func _reload_sources():
 	if not sources.is_empty():
 		_on_thumb_selected(sources.front().path)
 
-func _input(event: InputEvent) -> void:
-	if %Selected.has_focus() or (current_glyph_editor and current_glyph_editor.is_editing_definition()):
-		return
-	if event.is_action_pressed("create_tool"):
-		_on_create_pressed()
-	elif event.is_action_pressed("select_tool"):
-		_on_select_pressed()
-	elif event.is_action_pressed("erase_tool"):
-		_on_erase_pressed()
-	elif event.is_action_released("lookup_tool"):
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("lookup_tool"):
 		%Selected.grab_focus()
 		%Selected.text = ""
 
@@ -137,3 +129,9 @@ func _on_rename_pressed() -> void:
 	Database.rename_source(current_path, %SourceName.text + "." + current_path.get_extension() )
 	_reload_sources()
 	_on_thumb_selected(new_path)
+
+
+func _on_source_name_text_changed(new_text: String) -> void:
+	get_viewport().set_input_as_handled()
+func _on_selected_text_changed(new_text: String) -> void:
+	get_viewport().set_input_as_handled()
