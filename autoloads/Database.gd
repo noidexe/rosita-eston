@@ -678,7 +678,7 @@ class SourcesDB extends RefCounted:
 
 class TextureCache extends RefCounted:
 	const MAX_TEXTURES := 20
-	const MAX_THUMBNAIS := 100
+	const MAX_THUMBNAILS := 100
 	var base_path : String = ""
 	var textures : Dictionary[String,Texture2D] = {}
 	var thumbnails : Dictionary[String, Texture2D] = {}
@@ -732,7 +732,7 @@ class TextureCache extends RefCounted:
 				image.resize(200,113,Image.INTERPOLATE_LANCZOS)
 				image.save_jpg(full_path_thumb, 0.85)
 		var texture : Texture2D = ImageTexture.create_from_image(image) if image else (preload("uid://cc27nwruufj0o") as Texture2D)
-		if thumbnails.size() >= MAX_THUMBNAIS:
+		if thumbnails.size() >= MAX_THUMBNAILS:
 			thumbnails.erase(thumbnails.keys().front())
 		thumbnails[path] = texture
 
