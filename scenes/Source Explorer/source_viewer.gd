@@ -1,7 +1,7 @@
 extends Node2D
 class_name SourceViewer
 
-enum Mode { SELECT, CREATE, REMOVE }
+enum Mode { SELECT, CREATE, REMOVE, SEARCH }
 var mode = Mode.SELECT
 
 var drag_start_pos := Vector2()
@@ -61,7 +61,7 @@ func _input(event: InputEvent) -> void:
 		var motion_event := (event as InputEventMouseMotion)
 		$camera.position -= motion_event.relative / $camera.zoom
 	
-	if mode == Mode.CREATE:
+	if mode == Mode.CREATE or mode == Mode.SEARCH:
 		Input.set_default_cursor_shape(Input.CURSOR_CROSS)
 		if event is InputEventMouseButton and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
 			if event.is_pressed():

@@ -375,7 +375,7 @@ func rename_source( from: String, to: String ) -> Error:
 #region Texture retrieval
 func glyph_get_texture(glyph: Glyph) -> Texture2D:
 	if glyph == null or glyph.locations.is_empty():
-		return Texture2D.new()
+		return preload("res://textures/texture_not_found.png")
 	var first_location : Location = glyph.locations.front()
 	return texture_cache.get_texture_region(first_location.path, first_location.rect)
 

@@ -64,6 +64,10 @@ func _on_erase_pressed() -> void:
 
 
 func _on_source_viewer_rect_selected(rect: Rect2, id : int) -> void:
+	if Input.is_physical_key_pressed(KEY_ALT):
+		_find_most_similar(rect)
+		return
+
 	var glyph : Database.Glyph = Database.glyph_get(id)
 	var should_create = glyph == null or id == 0
 	if should_create:
@@ -73,6 +77,47 @@ func _on_source_viewer_rect_selected(rect: Rect2, id : int) -> void:
 	if should_create:
 		(%GlyphEditorContainer.get_child(0) as GlyphEditor)._on_add_definition_pressed()
 
+func _find_most_similar(rect: Rect2):
+	var base := Database.texture_cache.get_texture_region(current_path, rect).get_image()
+	var base_sig = extract_signature(base)
+	var images : Array[Image] = []
+	var sigs : Array[PackedByteArray] = []
+	for i in Database.glyph_db.glyphs.size():
+		var glyph = Database.glyph_db.glyphs[i]
+		assert(glyph == null or glyph.id == i)
+		var image = Database.glyph_get_texture(glyph).get_image()
+		assert(image != null)
+		images.append(image)
+		sigs.append(extract_signature(image))
+	var result := {}
+	for i in sigs.size():
+		result[compare_signatures(base_sig, sigs[i])] = i
+	result.sort()
+	var ordered = result.values()
+	viewer.select(ordered.front())
+	#for i in range(0,5):
+		#viewer.select(ordered[i])
+		#await get_tree().create_timer(0.3).timeout
+
+func compare_signatures(a: PackedByteArray, b: PackedByteArray) -> int:
+	var ret = 0
+	for i in a.size():
+		ret += abs(b[i] - a[i])
+	ret /= a.size()
+	return ret
+
+func extract_signature( img : Image) -> PackedByteArray:
+	var signature := PackedByteArray()
+	img.resize(8,8,Image.INTERPOLATE_LANCZOS)
+	img.decompress()
+	img.srgb_to_linear()
+	var shoud_invert = -1 if img.get_pixel(0,0).get_luminance() < 0.5 else 1
+	
+	for x in img.get_size().x:
+		for y in img.get_size().y:
+			var luma = img.get_pixel(x,y).get_luminance()
+			signature.append(shoud_invert * luma * 256)
+	return signature
 
 func _on_source_viewer_glyph_selected(id: int) -> void:
 	for child in %GlyphEditorContainer.get_children():
