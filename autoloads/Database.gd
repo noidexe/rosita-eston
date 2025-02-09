@@ -376,7 +376,9 @@ func rename_source( from: String, to: String ) -> Error:
 func glyph_get_texture(glyph: Glyph) -> Texture2D:
 	if glyph == null or glyph.locations.is_empty():
 		return preload("res://textures/texture_not_found.png")
-	var first_location : Location = glyph.locations.front()
+	var locations : Array[Location] = glyph.locations.duplicate()
+	locations.sort_custom(func(a : Location, b: Location): return a.rect.size.length_squared() > b.rect.size.length_squared()) 
+	var first_location : Location = locations.front()
 	return texture_cache.get_texture_region(first_location.path, first_location.rect)
 
 
